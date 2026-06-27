@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
+import { HeaderAuth } from "@/components/HeaderAuth";
 
 const navItemClass =
   "px-3 py-2 rounded-lg no-underline text-muted font-semibold text-sm hover:bg-chip-bg hover:text-fg transition-colors";
@@ -28,12 +29,7 @@ export function Header() {
         </nav>
 
         <div className="ml-auto">
-          <Link
-            href="/subscribe"
-            className="inline-flex items-center bg-primary text-primary-fg px-4 py-2 rounded-[9px] font-bold text-sm no-underline hover:opacity-90 transition-opacity"
-          >
-            로그인
-          </Link>
+          <HeaderAuth />
         </div>
       </div>
     </header>
