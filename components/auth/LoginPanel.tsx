@@ -20,8 +20,8 @@ export function LoginPanel({ onDone }: { onDone?: () => void }) {
 
   return (
     <div className="text-center">
-      <div className="inline-flex w-16 h-16 items-center justify-center bg-primary text-primary-fg rounded-[17px] mb-5">
-        <Logo size={30} />
+      <div className="inline-flex items-center justify-center mb-5">
+        <Logo size={72} />
       </div>
       <h1 className="text-2xl font-extrabold m-0">먼저 로그인하고 시작하세요</h1>
       <p className="text-base text-muted mt-3 mb-7 max-w-[360px] mx-auto leading-relaxed">

@@ -42,7 +42,7 @@ export default async function LandingPage() {
                 "radial-gradient(circle at 70% 25%, var(--accent) 0%, transparent 42%)",
             }}
           />
-          <Logo size={150} className="relative text-primary" />
+          <Logo size={180} className="relative" />
         </div>
       </section>
 
