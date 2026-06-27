@@ -1,5 +1,5 @@
 import { apiGet } from "@/lib/api/client";
-import type { ArticleCardData } from "@/lib/types";
+import type { ArticleCardData, ArticleDetail } from "@/lib/types";
 
 export interface ArticleQuery {
   topicId?: number;
@@ -18,4 +18,8 @@ export function getArticles(query: ArticleQuery = {}): Promise<ArticleCardData[]
   if (query.limit) params.set("limit", String(query.limit));
   const queryString = params.toString();
   return apiGet<ArticleCardData[]>(`/api/articles${queryString ? `?${queryString}` : ""}`);
+}
+
+export function getArticle(id: number): Promise<ArticleDetail> {
+  return apiGet<ArticleDetail>(`/api/articles/${id}`);
 }
