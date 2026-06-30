@@ -49,3 +49,40 @@ export interface ArticleDetail {
   blog: Blog;
   keywords: MatchedKeyword[];
 }
+
+export type MemberRole = "USER" | "ADMIN";
+
+export interface Member {
+  id: number;
+  email: string;
+  provider: string;
+  role: MemberRole;
+  consentAt: string | null;
+  createdAt: string;
+}
+
+export type PipelineRunStatus = "SUCCESS" | "PARTIAL" | "FAILED";
+
+export interface PipelineRun {
+  id: number;
+  startedAt: string;
+  finishedAt: string;
+  status: PipelineRunStatus;
+  durationSeconds: number;
+  collectedTotal: number;
+  collectedNew: number;
+  collectFailed: number;
+  matchedArticles: number;
+  tagsCreated: number;
+  membersNotified: number;
+  notificationsRecorded: number;
+  notifyFailed: number;
+}
+
+export interface AdminBlog {
+  id: number;
+  name: string;
+  domain: string;
+  rssUrl: string;
+  active: boolean;
+}

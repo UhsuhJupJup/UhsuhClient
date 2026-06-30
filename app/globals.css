@@ -16,6 +16,7 @@
   --chip-bg: #eff3f0;
   --skeleton: #e9edea;
   --danger: #c8483a;
+  --danger-soft: #fbe9e7;
 }
 
 @theme inline {
@@ -33,6 +34,7 @@
   --color-chip-bg: var(--chip-bg);
   --color-skeleton: var(--skeleton);
   --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
   --font-sans: "Pretendard", ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), "JetBrains Mono", monospace;
 }

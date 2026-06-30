@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { HeaderAuth } from "@/components/HeaderAuth";
 import { SubscribeNavLink } from "@/components/SubscribeNavLink";
+import { AdminNavLink } from "@/components/AdminNavLink";
 
 const navItemClass =
   "px-3 py-2 rounded-lg no-underline text-muted font-semibold text-sm hover:bg-chip-bg hover:text-fg transition-colors";
@@ -23,6 +24,7 @@ export function Header() {
             탐색
           </Link>
           <SubscribeNavLink className={navItemClass} />
+          <AdminNavLink className={navItemClass} />
         </nav>
 
         <div className="ml-auto">
