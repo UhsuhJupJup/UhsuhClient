@@ -28,7 +28,7 @@ export default async function ArticleDetailPage({
 
       <div className="flex items-center gap-2 text-sm text-muted">
         <Link
-          href={`/blog/${article.blog.id}`}
+          href={`/explore?tab=blog&blogId=${article.blog.id}`}
           className="inline-flex items-center gap-2 text-fg no-underline hover:text-primary transition-colors"
         >
           <span className="inline-flex w-6 h-6 items-center justify-center rounded-md bg-chip-bg text-fg font-bold text-[11px]">

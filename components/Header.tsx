@@ -21,7 +21,7 @@ export function Header() {
 
         <nav className="flex gap-1 ml-1.5 whitespace-nowrap">
           <Link href="/explore" className={navItemClass}>
-            탐색
+            줍줍한 글
           </Link>
           <SubscribeNavLink className={navItemClass} />
           <AdminNavLink className={navItemClass} />

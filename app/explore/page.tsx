@@ -46,7 +46,7 @@ export default async function ExplorePage({
 
   return (
     <main className="max-w-[1200px] mx-auto px-6 py-12">
-      <h1 className="text-[36px] font-extrabold tracking-[-0.025em] m-0">탐색</h1>
+      <h1 className="text-[36px] font-extrabold tracking-[-0.025em] m-0">줍줍한 글</h1>
       <p className="text-base text-muted mt-2 mb-8">
         수집된 기술 블로그 글을 모아봤어요. 토픽, 블로그로 필터링하거나 제목으로 검색해 보세요.
       </p>

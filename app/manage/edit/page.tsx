@@ -22,7 +22,7 @@ export default function ManageEditPage() {
   }
 
   return (
-    <main className="max-w-[760px] mx-auto px-6 py-12">
+    <main className="max-w-[980px] mx-auto px-6 py-12">
       <SubscriptionEditor mode="edit" />
     </main>
   );

@@ -80,7 +80,7 @@ export default function ManagePage() {
           {topics.map((topic) => (
             <Link
               key={`t-${topic.id}`}
-              href={`/topic/${topic.id}`}
+              href={`/explore?tab=topic&topicId=${topic.id}`}
               className="inline-flex items-center gap-1.5 bg-card border border-border text-sm px-3.5 py-2 rounded-lg no-underline text-fg hover:border-primary hover:text-primary transition-colors"
             >
               <span className="text-xs text-muted">토픽</span>

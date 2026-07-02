@@ -29,7 +29,7 @@ export default async function LandingPage() {
               href="/explore"
               className="inline-flex items-center bg-transparent text-fg border border-border px-6 py-[15px] rounded-[11px] font-bold text-base no-underline hover:border-primary hover:text-primary transition-colors"
             >
-              토픽 둘러보기
+              줍줍한 글 보러가기
             </Link>
           </div>
         </div>
@@ -48,7 +48,7 @@ export default async function LandingPage() {
 
       <section className="pt-2 pb-12">
         <p className="text-[28px] font-extrabold tracking-[-0.02em] mb-1.5">
-          인기 토픽
+          줍줍하는 토픽
         </p>
         <p className="text-[15px] text-muted mb-[22px]">
           바로 칩을 눌러 키워드를 살펴보세요.
@@ -57,7 +57,7 @@ export default async function LandingPage() {
           {topics.map((topic) => (
             <Link
               key={topic.id}
-              href={`/topic/${topic.id}`}
+              href={`/explore?tab=topic&topicId=${topic.id}`}
               className="font-mono text-[15px] text-fg bg-card border border-border px-[18px] py-[11px] rounded-[10px] no-underline font-medium hover:border-primary hover:text-primary hover:bg-primary-soft transition-colors"
             >
               {topic.name}
@@ -77,7 +77,7 @@ export default async function LandingPage() {
           {blogs.map((blog) => (
             <Link
               key={blog.id}
-              href={`/blog/${blog.id}`}
+              href={`/explore?tab=blog&blogId=${blog.id}`}
               className="text-sm text-fg bg-card border border-border px-3.5 py-2.5 rounded-[9px] no-underline font-medium hover:border-primary hover:text-primary transition-colors"
             >
               {blog.name}

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthProvider";
-import { getTopics } from "@/lib/api/topics";
+import { getTopics, getTopic } from "@/lib/api/topics";
 import { searchKeywords } from "@/lib/api/keywords";
 import {
   agreeConsent,
@@ -12,7 +12,7 @@ import {
   unsubscribeAll,
 } from "@/lib/api/subscriptions";
 import { ApiError } from "@/lib/api/client";
-import type { Keyword, Topic } from "@/lib/types";
+import type { Keyword, Topic, TopicDetail } from "@/lib/types";
 import { BackLink } from "@/components/BackLink";
 
 export function SubscriptionEditor({ mode = "create" }: { mode?: "create" | "edit" }) {
@@ -20,7 +20,7 @@ export function SubscriptionEditor({ mode = "create" }: { mode?: "create" | "edi
   const router = useRouter();
   const isEdit = mode === "edit";
 
-  const [allTopics, setAllTopics] = useState<Topic[]>([]);
+  const [allTopics, setAllTopics] = useState<TopicDetail[]>([]);
   const [selectedTopics, setSelectedTopics] = useState<Map<number, string>>(new Map());
   const [selectedKeywords, setSelectedKeywords] = useState<Map<number, string>>(new Map());
   const [query, setQuery] = useState("");
@@ -41,8 +41,9 @@ export function SubscriptionEditor({ mode = "create" }: { mode?: "create" | "edi
           getTopics(),
           token ? getSubscriptions(token) : Promise.resolve({ topics: [], keywords: [] }),
         ]);
+        const detailedTopics = await Promise.all(topics.map((topic) => getTopic(topic.id)));
         if (!active) return;
-        setAllTopics(topics);
+        setAllTopics(detailedTopics);
         setSelectedTopics(new Map(subs.topics.map((topic) => [topic.id, topic.name])));
         setSelectedKeywords(new Map(subs.keywords.map((keyword) => [keyword.id, keyword.name])));
         initialTopicIds.current = new Set(subs.topics.map((topic) => topic.id));
@@ -132,6 +133,7 @@ export function SubscriptionEditor({ mode = "create" }: { mode?: "create" | "edi
   }
 
   const selectedCount = selectedTopics.size + selectedKeywords.size;
+  const selectedTopicDetails = allTopics.filter((topic) => selectedTopics.has(topic.id));
   const isDirty =
     !sameIds(selectedTopics, initialTopicIds.current) ||
     !sameIds(selectedKeywords, initialKeywordIds.current);
@@ -155,31 +157,8 @@ export function SubscriptionEditor({ mode = "create" }: { mode?: "create" | "edi
           : "관심 토픽, 키워드를 담고 받을 메일만 확인하면 끝이에요."}
       </p>
 
-      <div className="bg-surface border border-border rounded-2xl p-5 mb-8">
-        <div className="flex items-center gap-2 mb-3.5">
-          <span className="text-sm font-bold">담은 항목</span>
-          <span className="font-mono text-xs text-muted">{selectedCount}</span>
-        </div>
-        {selectedCount === 0 ? (
-          <p className="text-sm text-muted m-0">아래에서 토픽이나 키워드를 눌러 담아주세요.</p>
-        ) : (
-          <div className="flex flex-wrap gap-2">
-            {[...selectedTopics].map(([id, name]) => (
-              <span key={`t-${id}`} className="inline-flex items-center gap-1.5 bg-primary-soft text-primary text-sm px-3 py-1.5 rounded-lg">
-                {name}
-                <button onClick={() => toggleTopic({ id, name })} aria-label="제거" className="text-primary/70 hover:text-danger">×</button>
-              </span>
-            ))}
-            {[...selectedKeywords].map(([id, name]) => (
-              <span key={`k-${id}`} className="inline-flex items-center gap-1.5 bg-primary-soft text-primary font-mono text-sm px-3 py-1.5 rounded-lg">
-                {name}
-                <button onClick={() => toggleKeyword(id, name)} aria-label="제거" className="hover:text-danger">×</button>
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
-
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6 items-start">
+        <div className="min-w-0">
       <Step number={1} title="받을 메일">
         <input
           value={user?.email ?? ""}
@@ -190,6 +169,31 @@ export function SubscriptionEditor({ mode = "create" }: { mode?: "create" | "edi
       </Step>
 
       <Step number={2} title="관심 토픽, 키워드 선택">
+        <div className="bg-surface border border-border rounded-xl p-4 mb-5">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-sm font-bold">담은 항목</span>
+            <span className="font-mono text-xs text-muted">{selectedCount}</span>
+          </div>
+          {selectedCount === 0 ? (
+            <p className="text-sm text-muted m-0">아래에서 토픽이나 키워드를 눌러 담아주세요.</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {[...selectedTopics].map(([id, name]) => (
+                <span key={`t-${id}`} className="inline-flex items-center gap-1.5 bg-primary-soft text-primary text-sm px-3 py-1.5 rounded-lg">
+                  {name}
+                  <button onClick={() => toggleTopic({ id, name })} aria-label="제거" className="text-primary/70 hover:text-danger">×</button>
+                </span>
+              ))}
+              {[...selectedKeywords].map(([id, name]) => (
+                <span key={`k-${id}`} className="inline-flex items-center gap-1.5 bg-primary-soft text-primary font-mono text-sm px-3 py-1.5 rounded-lg">
+                  {name}
+                  <button onClick={() => toggleKeyword(id, name)} aria-label="제거" className="hover:text-danger">×</button>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
         <p className="text-sm font-semibold text-muted mt-1 mb-2">토픽</p>
         <div className="flex flex-wrap gap-2 mb-6">
           {allTopics.map((topic) => {
@@ -212,30 +216,40 @@ export function SubscriptionEditor({ mode = "create" }: { mode?: "create" | "edi
         </div>
 
         <p className="text-sm font-semibold text-muted mb-2">키워드</p>
-        <input
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="키워드 검색 (예: redis, kafka)"
-          className="w-full bg-card border border-border rounded-xl px-4 py-3 text-base outline-none focus:border-primary mb-3"
-        />
-        <div className="flex flex-wrap gap-2">
-          {results.map((keyword) => {
-            const active = selectedKeywords.has(keyword.id);
-            return (
-              <button
-                key={keyword.id}
-                onClick={() => toggleKeyword(keyword.id, keyword.name)}
-                className={`font-mono text-sm px-3.5 py-2 rounded-lg border transition-colors ${
-                  active
-                    ? "bg-primary text-primary-fg border-primary"
-                    : "bg-card text-fg border-border hover:border-primary hover:text-primary"
-                }`}
-              >
-                {active ? "✓ " : ""}
-                {keyword.name}
-              </button>
-            );
-          })}
+        <div className="relative">
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="키워드 검색 (예: redis, kafka)"
+            className="w-full bg-card border border-border rounded-xl px-4 py-3 text-base outline-none focus:border-primary"
+          />
+          {query.trim() && (
+            <div className="absolute left-0 right-0 top-full mt-2 z-10 bg-card border border-border rounded-xl p-3 max-h-[240px] overflow-y-auto shadow-lg">
+              {results.length === 0 ? (
+                <p className="text-sm text-muted m-0">검색 결과가 없어요.</p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {results.map((keyword) => {
+                    const active = selectedKeywords.has(keyword.id);
+                    return (
+                      <button
+                        key={keyword.id}
+                        onClick={() => toggleKeyword(keyword.id, keyword.name)}
+                        className={`font-mono text-sm px-3.5 py-2 rounded-lg border transition-colors ${
+                          active
+                            ? "bg-primary text-primary-fg border-primary"
+                            : "bg-card text-fg border-border hover:border-primary hover:text-primary"
+                        }`}
+                      >
+                        {active ? "✓ " : ""}
+                        {keyword.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </Step>
 
@@ -272,6 +286,38 @@ export function SubscriptionEditor({ mode = "create" }: { mode?: "create" | "edi
           전체 구독 해지
         </button>
       )}
+        </div>
+
+        <aside className="lg:sticky lg:top-20 bg-card border border-border rounded-2xl p-5">
+          <h3 className="text-sm font-bold m-0 mb-1">이 토픽으로 받을 키워드</h3>
+          <p className="text-xs text-muted mb-3">담은 토픽에 포함된 키워드의 새 글이 오면 알림을 보내요.</p>
+          {selectedTopicDetails.length === 0 ? (
+            <p className="text-sm text-muted m-0">아직 담은 토픽이 없어요. 토픽을 담으면 여기 보여요.</p>
+          ) : (
+            <div className="flex flex-col gap-3.5">
+              {selectedTopicDetails.map((topic) => (
+                <div key={topic.id}>
+                  <p className="text-sm font-semibold text-primary m-0 mb-1.5">{topic.name}</p>
+                  {topic.keywords.length > 0 ? (
+                    <div className="flex flex-wrap gap-1.5">
+                      {topic.keywords.map((keyword) => (
+                        <span
+                          key={keyword.id}
+                          className="font-mono text-xs text-muted bg-chip-bg px-2 py-1 rounded-md"
+                        >
+                          {keyword.name}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted m-0">키워드 없음</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </aside>
+      </div>
     </div>
   );
 }
