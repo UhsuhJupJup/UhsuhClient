@@ -1,14 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { LoginPanel } from "@/components/auth/LoginPanel";
 import { SubscriptionEditor } from "@/components/subscription/SubscriptionEditor";
 
 export default function SubscribePage() {
   const { user, loading } = useAuth();
+  const router = useRouter();
+  const [redirecting, setRedirecting] = useState(false);
 
-  if (loading) {
+  if (loading || redirecting) {
     return <main className="max-w-[760px] mx-auto px-6 py-24 text-center text-muted">불러오는 중…</main>;
   }
 
@@ -16,7 +20,12 @@ export default function SubscribePage() {
     return (
       <main className="max-w-[460px] mx-auto px-6 py-24">
         <div className="bg-card border border-border rounded-[22px] p-9">
-          <LoginPanel />
+          <LoginPanel
+            onDone={() => {
+              setRedirecting(true);
+              router.replace("/");
+            }}
+          />
           <p className="text-center text-sm text-muted mt-6">
             먼저 둘러볼까요?{" "}
             <Link href="/explore" className="text-primary font-semibold no-underline">
