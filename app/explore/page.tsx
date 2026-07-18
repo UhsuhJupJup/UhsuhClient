@@ -5,12 +5,14 @@ import { getTopics } from "@/lib/api/topics";
 import { getBlogs } from "@/lib/api/blogs";
 import { ArticleCard } from "@/components/ArticleCard";
 import { ExploreSearch } from "@/components/ExploreSearch";
+import { Pagination } from "@/components/Pagination";
 
 type ExploreParams = {
   tab?: string;
   topicId?: string;
   blogId?: string;
   q?: string;
+  page?: string;
 };
 
 function buildHref(params: Record<string, string | undefined>): string {
@@ -36,13 +38,27 @@ export default async function ExplorePage({
   const blogId = params.blogId ? Number(params.blogId) : undefined;
   const q = params.q?.trim() || undefined;
 
-  const articles = await getArticles({
+  const currentPage = params.page && Number(params.page) > 0 ? Number(params.page) : 1;
+
+  const articlePage = await getArticles({
     topicId: tab === "topic" ? topicId : undefined,
     blogId: tab === "blog" ? blogId : undefined,
     q,
+    page: currentPage,
+    size: 10,
   });
+  const articles = articlePage.content;
   const topics = tab === "topic" ? await getTopics() : [];
   const blogs = tab === "blog" ? await getBlogs() : [];
+
+  const pageHref = (target: number) =>
+    buildHref({
+      tab: tab === "all" ? undefined : tab,
+      topicId: tab === "topic" ? params.topicId : undefined,
+      blogId: tab === "blog" ? params.blogId : undefined,
+      q,
+      page: target > 1 ? String(target) : undefined,
+    });
 
   return (
     <main className="max-w-[1200px] mx-auto px-6 py-12">
@@ -121,11 +137,18 @@ export default async function ExplorePage({
       )}
 
       {articles.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
-          {articles.map((article) => (
-            <ArticleCard key={article.id} article={article} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+            {articles.map((article) => (
+              <ArticleCard key={article.id} article={article} />
+            ))}
+          </div>
+          <Pagination
+            currentPage={articlePage.page}
+            totalPages={articlePage.totalPages}
+            hrefForPage={pageHref}
+          />
+        </>
       ) : (
         <div className="flex flex-col items-center text-center gap-2 py-20">
           <h3 className="text-lg font-bold text-fg m-0">조건에 맞는 글이 없어요</h3>
