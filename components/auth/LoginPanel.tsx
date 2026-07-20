@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/auth/AuthProvider";
 import { Logo } from "@/components/Logo";
 
 export function LoginPanel({ onDone }: { onDone?: () => void }) {
-  const { loginWithGithub, loginWithGoogle, configured } = useAuth();
+  const { loginWithGoogle, configured } = useAuth();
   const [error, setError] = useState<string | null>(null);
 
   async function run(login: () => Promise<void>) {
@@ -37,17 +37,9 @@ export function LoginPanel({ onDone }: { onDone?: () => void }) {
 
       <div className="flex flex-col gap-3">
         <button
-          onClick={() => run(loginWithGithub)}
-          disabled={!configured}
-          className="inline-flex items-center justify-center gap-2.5 bg-fg text-card px-5 py-3.5 rounded-xl font-bold text-base hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <span className="font-mono text-xs">GH</span>
-          GitHub로 계속하기
-        </button>
-        <button
           onClick={() => run(loginWithGoogle)}
           disabled={!configured}
-          className="inline-flex items-center justify-center gap-2.5 bg-card text-fg border border-border px-5 py-3.5 rounded-xl font-bold text-base hover:bg-chip-bg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center justify-center gap-2.5 bg-fg text-card px-5 py-3.5 rounded-xl font-bold text-base hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span className="font-mono text-xs">G</span>
           Google로 계속하기

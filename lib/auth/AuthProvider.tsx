@@ -9,7 +9,6 @@ import {
   useState,
 } from "react";
 import {
-  GithubAuthProvider,
   GoogleAuthProvider,
   onAuthStateChanged,
   signInWithPopup,
@@ -49,7 +48,6 @@ interface AuthContextValue {
   user: User | null;
   loading: boolean;
   configured: boolean;
-  loginWithGithub: () => Promise<void>;
   loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   getIdToken: () => Promise<string | null>;
@@ -76,26 +74,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const login = useCallback(async (provider: GithubAuthProvider | GoogleAuthProvider) => {
+  const loginWithGoogle = useCallback(async () => {
     if (!auth || loginInProgress.current) return;
     loginInProgress.current = true;
     try {
-      const result = await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, new GoogleAuthProvider());
       await ensureMemberSynced(result.user);
     } finally {
       loginInProgress.current = false;
     }
   }, []);
-
-  const loginWithGithub = useCallback(
-    () => login(new GithubAuthProvider()),
-    [login],
-  );
-
-  const loginWithGoogle = useCallback(
-    () => login(new GoogleAuthProvider()),
-    [login],
-  );
 
   const logout = useCallback(async () => {
     memberSyncs.clear();
@@ -114,7 +102,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         loading,
         configured: isFirebaseConfigured,
-        loginWithGithub,
         loginWithGoogle,
         logout,
         getIdToken,
