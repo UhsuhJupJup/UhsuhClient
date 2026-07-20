@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { getRuns } from "@/lib/api/admin";
 import { formatDateTime, formatDuration, formatTime } from "@/lib/format";
-import type { PipelineRun, PipelineRunStatus } from "@/lib/types";
+import type { PipelineRun, PipelineRunStatus, PipelineRunKind } from "@/lib/types";
 
 const statusStyle: Record<PipelineRunStatus, string> = {
   SUCCESS: "bg-primary-soft text-primary",
@@ -16,6 +16,16 @@ const statusLabel: Record<PipelineRunStatus, string> = {
   SUCCESS: "성공",
   PARTIAL: "부분 성공",
   FAILED: "실패",
+};
+
+const kindStyle: Record<PipelineRunKind, string> = {
+  INGEST: "bg-chip-bg text-fg",
+  NOTIFICATION: "bg-primary-soft text-primary",
+};
+
+const kindLabel: Record<PipelineRunKind, string> = {
+  INGEST: "수집·매칭",
+  NOTIFICATION: "알림",
 };
 
 const headClass = "text-left font-semibold px-5 py-3 whitespace-nowrap";
@@ -73,6 +83,7 @@ export function AdminRuns() {
           <thead>
             <tr className="text-muted border-b border-border">
               <th className={headClass}>실행 일시</th>
+              <th className={headClass}>종류</th>
               <th className={headClass}>상태</th>
               <th className={headClass}>수집 (신규/전체)</th>
               <th className={headClass}>매칭 (글·태그)</th>
@@ -89,24 +100,45 @@ export function AdminRuns() {
                   </div>
                 </td>
                 <td className="px-5 py-4">
+                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${kindStyle[run.kind]}`}>
+                    {kindLabel[run.kind]}
+                  </span>
+                </td>
+                <td className="px-5 py-4">
                   <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${statusStyle[run.status]}`}>
                     {statusLabel[run.status]}
                   </span>
                 </td>
                 <td className="px-5 py-4 font-mono text-xs whitespace-nowrap">
-                  <span className="text-fg">{run.collectedNew}</span>
-                  <span className="text-muted">/{run.collectedTotal}</span>
-                  {run.collectFailed > 0 && (
-                    <span className="text-danger"> · 실패 {run.collectFailed}</span>
+                  {run.kind === "INGEST" ? (
+                    <>
+                      <span className="text-fg">{run.collectedNew}</span>
+                      <span className="text-muted">/{run.collectedTotal}</span>
+                      {run.collectFailed > 0 && (
+                        <span className="text-danger"> · 실패 {run.collectFailed}</span>
+                      )}
+                    </>
+                  ) : (
+                    <span className="text-muted">–</span>
                   )}
                 </td>
                 <td className="px-5 py-4 font-mono text-xs whitespace-nowrap">
-                  글 {run.matchedArticles} · 태그 {run.tagsCreated}
+                  {run.kind === "INGEST" ? (
+                    <>글 {run.matchedArticles} · 태그 {run.tagsCreated}</>
+                  ) : (
+                    <span className="text-muted">–</span>
+                  )}
                 </td>
                 <td className="px-5 py-4 font-mono text-xs whitespace-nowrap">
-                  회원 {run.membersNotified} · 기록 {run.notificationsRecorded}
-                  {run.notifyFailed > 0 && (
-                    <span className="text-danger"> · 실패 {run.notifyFailed}</span>
+                  {run.kind === "NOTIFICATION" ? (
+                    <>
+                      회원 {run.membersNotified} · 기록 {run.notificationsRecorded}
+                      {run.notifyFailed > 0 && (
+                        <span className="text-danger"> · 실패 {run.notifyFailed}</span>
+                      )}
+                    </>
+                  ) : (
+                    <span className="text-muted">–</span>
                   )}
                 </td>
               </tr>
