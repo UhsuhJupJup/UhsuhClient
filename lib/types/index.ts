@@ -73,8 +73,11 @@ export interface Member {
 
 export type PipelineRunStatus = "SUCCESS" | "PARTIAL" | "FAILED";
 
+export type PipelineRunKind = "INGEST" | "NOTIFICATION";
+
 export interface PipelineRun {
   id: number;
+  kind: PipelineRunKind;
   startedAt: string;
   finishedAt: string;
   status: PipelineRunStatus;
