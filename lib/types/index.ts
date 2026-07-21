@@ -60,6 +60,30 @@ export interface ArticleDetail {
   keywords: MatchedKeyword[];
 }
 
+export interface Note {
+  id: number;
+  title: string;
+  content: string;
+  analyzedAt: string | null;
+  keywords: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RecommendedArticle {
+  articleId: number;
+  title: string;
+  url: string;
+  blogName: string;
+  publishedAt: string;
+  matchedKeywords: string[];
+}
+
+export interface NoteRecommendation {
+  keywords: string[];
+  articles: RecommendedArticle[];
+}
+
 export type MemberRole = "USER" | "ADMIN";
 
 export interface Member {
@@ -73,8 +97,11 @@ export interface Member {
 
 export type PipelineRunStatus = "SUCCESS" | "PARTIAL" | "FAILED";
 
+export type PipelineRunKind = "INGEST" | "NOTIFICATION";
+
 export interface PipelineRun {
   id: number;
+  kind: PipelineRunKind;
   startedAt: string;
   finishedAt: string;
   status: PipelineRunStatus;
