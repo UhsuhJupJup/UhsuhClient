@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { HeaderAuth } from "@/components/HeaderAuth";
 import { SubscribeNavLink } from "@/components/SubscribeNavLink";
+import { NotesNavLink } from "@/components/NotesNavLink";
 import { AdminNavLink } from "@/components/AdminNavLink";
 
 const navItemClass =
@@ -27,7 +28,8 @@ export function Header() {
           <AdminNavLink className={navItemClass} />
         </nav>
 
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-1">
+          <NotesNavLink className={navItemClass} />
           <HeaderAuth />
         </div>
       </div>
