@@ -60,6 +60,15 @@ export interface ArticleDetail {
   keywords: MatchedKeyword[];
 }
 
+export interface Note {
+  id: number;
+  title: string;
+  content: string;
+  analyzedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type MemberRole = "USER" | "ADMIN";
 
 export interface Member {
