@@ -65,8 +65,23 @@ export interface Note {
   title: string;
   content: string;
   analyzedAt: string | null;
+  keywords: string[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface RecommendedArticle {
+  articleId: number;
+  title: string;
+  url: string;
+  blogName: string;
+  publishedAt: string;
+  matchedKeywords: string[];
+}
+
+export interface NoteRecommendation {
+  keywords: string[];
+  articles: RecommendedArticle[];
 }
 
 export type MemberRole = "USER" | "ADMIN";

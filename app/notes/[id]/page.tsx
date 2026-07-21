@@ -128,6 +128,19 @@ export default function NoteDetailPage({ params }: { params: Promise<{ id: strin
         </div>
       </div>
 
+      {note.keywords.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-4">
+          {note.keywords.map((keyword) => (
+            <span
+              key={keyword}
+              className="font-mono text-xs text-muted bg-chip-bg px-2 py-1 rounded-md"
+            >
+              {keyword}
+            </span>
+          ))}
+        </div>
+      )}
+
       {actionError && <p className="text-sm text-danger mt-4">{actionError}</p>}
 
       <article className="mt-8 bg-card border border-border rounded-2xl p-7">
