@@ -3,6 +3,7 @@ import { Logo } from "@/components/Logo";
 import { HeaderAuth } from "@/components/HeaderAuth";
 import { SubscribeNavLink } from "@/components/SubscribeNavLink";
 import { NotesNavLink } from "@/components/NotesNavLink";
+import { ArchiveNavLink } from "@/components/ArchiveNavLink";
 import { AdminNavLink } from "@/components/AdminNavLink";
 
 const navItemClass =
@@ -29,6 +30,7 @@ export function Header() {
         </nav>
 
         <div className="ml-auto flex items-center gap-1">
+          <ArchiveNavLink className={navItemClass} />
           <NotesNavLink className={navItemClass} />
           <HeaderAuth />
         </div>
