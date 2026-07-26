@@ -140,7 +140,7 @@ export default async function ExplorePage({
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
             {articles.map((article) => (
-              <ArticleCard key={article.id} article={article} />
+              <ArticleCard key={article.id} article={article} bookmarkable />
             ))}
           </div>
           <Pagination

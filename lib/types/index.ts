@@ -33,6 +33,16 @@ export interface ArticlePage {
   hasPrevious: boolean;
 }
 
+export interface NotificationItem {
+  article: ArticleCardData;
+  sentAt: string;
+}
+
+export interface BookmarkItem {
+  article: ArticleCardData;
+  bookmarkedAt: string;
+}
+
 export interface TopicDetail {
   id: number;
   name: string;

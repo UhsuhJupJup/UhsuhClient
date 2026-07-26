@@ -4,6 +4,7 @@ import { getArticle } from "@/lib/api/articles";
 import { ApiError } from "@/lib/api/client";
 import type { ArticleDetail } from "@/lib/types";
 import { BackLink } from "@/components/BackLink";
+import { BookmarkButton } from "@/components/BookmarkButton";
 import { formatDate } from "@/lib/format";
 
 export default async function ArticleDetailPage({
@@ -38,6 +39,7 @@ export default async function ArticleDetailPage({
         </Link>
         <span aria-hidden>·</span>
         <span>{formatDate(article.publishedAt)}</span>
+        <BookmarkButton articleId={article.id} className="ml-auto" />
       </div>
 
       <h1 className="text-[32px] font-extrabold leading-tight tracking-[-0.02em] mt-4 mb-5">
