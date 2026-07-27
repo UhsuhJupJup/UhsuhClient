@@ -33,17 +33,17 @@ interface Tip {
   meta: string;
 }
 
-const REP = 5400;
+const REP = 9500;
 const SPRING = 0.05;
-const GRAV = 0.02;
+const GRAV = 0.016;
 const DAMP = 0.85;
-const VMAX = 6;
+const VMAX = 7;
 const MARGIN = 26;
 
 function restLength(kind: SimEdge["kind"]): number {
-  if (kind === "note") return 66;
-  if (kind === "art") return 60;
-  return 80;
+  if (kind === "note") return 100;
+  if (kind === "art") return 92;
+  return 130;
 }
 
 function withAlpha(color: string, alpha: number): string {
@@ -297,7 +297,7 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
           ctx.fillStyle = colors.fg;
           ctx.font = '700 12px "Pretendard", sans-serif';
           ctx.fillText(truncate(node.label, 16), node.x, node.y + node.r + 5);
-        } else if (node.type === "keyword") {
+        } else if (node.type === "keyword" && (node.inNote || node.r >= 8)) {
           ctx.fillStyle = node.inNote ? colors.fg : colors.muted;
           ctx.font = `${node.inNote ? "600 " : ""}11px "Pretendard", sans-serif`;
           ctx.fillText(truncate(node.label, 12), node.x, node.y + node.r + 4);
@@ -326,7 +326,7 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
       if (!initialized) {
         layoutInit();
-        for (let i = 0; i < 260; i++) step();
+        for (let i = 0; i < 320; i++) step();
         initialized = true;
       } else {
         for (const node of simNodes) {
@@ -438,7 +438,7 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-[420px] sm:h-[500px] overflow-hidden rounded-2xl border border-border bg-surface"
+      className="relative w-full h-[480px] sm:h-[580px] overflow-hidden rounded-2xl border border-border bg-surface"
     >
       <canvas ref={canvasRef} className="block h-full w-full touch-none" style={{ cursor: "grab" }} />
       {tip && (
