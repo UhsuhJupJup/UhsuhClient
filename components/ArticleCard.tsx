@@ -54,7 +54,7 @@ export function ArticleCard({
         href={article.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1 text-sm font-semibold text-primary no-underline hover:opacity-90 mt-1"
+        className="mt-auto self-end inline-flex items-center gap-1 rounded-[10px] bg-primary px-4 py-2.5 text-sm font-semibold text-primary-fg no-underline hover:bg-primary-soft hover:text-primary transition-colors"
       >
         원문 보기 ↗
       </a>

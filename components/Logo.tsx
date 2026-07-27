@@ -8,7 +8,7 @@ type LogoProps = {
 export function Logo({ size = 20, className = "" }: LogoProps) {
   return (
     <Image
-      src="/emoticon.png"
+      src="/mascot-icon.png"
       alt="어서줍줍"
       width={size}
       height={size}

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { getSubscriptions, type Subscriptions } from "@/lib/api/subscriptions";
 import { LoginPanel } from "@/components/auth/LoginPanel";
+import { PageHeader } from "@/components/PageHeader";
 
 export default function ManagePage() {
   const { user, loading, getIdToken } = useAuth();
@@ -41,8 +42,11 @@ export default function ManagePage() {
 
   return (
     <main className="max-w-[760px] mx-auto px-6 py-12">
-      <h1 className="text-[36px] font-extrabold tracking-[-0.025em] m-0">구독 관리</h1>
-      <p className="text-base text-muted mt-2 mb-8">구독 중인 항목을 확인하고 관리하세요.</p>
+      <PageHeader
+        eyebrow="Subscriptions"
+        title="구독 관리"
+        description="구독 중인 항목을 확인하고 관리하세요."
+      />
 
       <div className="flex items-center gap-3 bg-card border border-border rounded-2xl p-4 mb-8">
         <span className="inline-flex w-10 h-10 items-center justify-center rounded-full bg-primary-soft text-primary font-extrabold">
@@ -76,27 +80,43 @@ export default function ManagePage() {
           </Link>
         </div>
       ) : (
-        <div className="flex flex-wrap gap-2">
-          {topics.map((topic) => (
-            <Link
-              key={`t-${topic.id}`}
-              href={`/explore?tab=topic&topicId=${topic.id}`}
-              className="inline-flex items-center gap-1.5 bg-card border border-border text-sm px-3.5 py-2 rounded-lg no-underline text-fg hover:border-primary hover:text-primary transition-colors"
-            >
-              <span className="text-xs text-muted">토픽</span>
-              {topic.name}
-            </Link>
-          ))}
-          {keywords.map((keyword) => (
-            <Link
-              key={`k-${keyword.id}`}
-              href={`/keyword/${keyword.id}`}
-              className="inline-flex items-center gap-1.5 bg-card border border-border font-mono text-sm px-3.5 py-2 rounded-lg no-underline text-fg hover:border-primary hover:text-primary transition-colors"
-            >
-              <span className="font-sans text-xs text-muted">키워드</span>
-              {keyword.name}
-            </Link>
-          ))}
+        <div className="flex flex-col gap-6">
+          {topics.length > 0 && (
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-acorn mb-2.5">
+                토픽 · {topics.length}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {topics.map((topic) => (
+                  <Link
+                    key={`t-${topic.id}`}
+                    href={`/explore?tab=topic&topicId=${topic.id}`}
+                    className="inline-flex items-center bg-card border border-border text-sm px-3.5 py-2 rounded-lg no-underline text-fg hover:border-primary hover:text-primary transition-colors"
+                  >
+                    {topic.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+          {keywords.length > 0 && (
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-acorn mb-2.5">
+                키워드 · {keywords.length}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {keywords.map((keyword) => (
+                  <Link
+                    key={`k-${keyword.id}`}
+                    href={`/keyword/${keyword.id}`}
+                    className="inline-flex items-center bg-card border border-border font-mono text-sm px-3.5 py-2 rounded-lg no-underline text-fg hover:border-primary hover:text-primary transition-colors"
+                  >
+                    {keyword.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </main>

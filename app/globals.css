@@ -2,7 +2,7 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #f5f7f5;
+  --bg: #ffffff;
   --card: #ffffff;
   --surface: #fbfcfb;
   --fg: #15201a;
@@ -13,6 +13,8 @@
   --primary-soft: #e7f1eb;
   --accent: #d7f051;
   --accent-ink: #2c3a12;
+  --acorn: #7c5a3a;
+  --acorn-soft: #f0e7dc;
   --chip-bg: #eff3f0;
   --skeleton: #e9edea;
   --danger: #c8483a;
@@ -31,6 +33,8 @@
   --color-primary-soft: var(--primary-soft);
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
+  --color-acorn: var(--acorn);
+  --color-acorn-soft: var(--acorn-soft);
   --color-chip-bg: var(--chip-bg);
   --color-skeleton: var(--skeleton);
   --color-danger: var(--danger);

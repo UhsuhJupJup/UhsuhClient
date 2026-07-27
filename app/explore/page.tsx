@@ -6,6 +6,7 @@ import { getBlogs } from "@/lib/api/blogs";
 import { ArticleCard } from "@/components/ArticleCard";
 import { ExploreSearch } from "@/components/ExploreSearch";
 import { Pagination } from "@/components/Pagination";
+import { PageHeader } from "@/components/PageHeader";
 
 type ExploreParams = {
   tab?: string;
@@ -62,10 +63,11 @@ export default async function ExplorePage({
 
   return (
     <main className="max-w-[1200px] mx-auto px-6 py-12">
-      <h1 className="text-[36px] font-extrabold tracking-[-0.025em] m-0">줍줍한 글</h1>
-      <p className="text-base text-muted mt-2 mb-8">
-        수집된 기술 블로그 글을 모아봤어요. 토픽, 블로그로 필터링하거나 제목으로 검색해 보세요.
-      </p>
+      <PageHeader
+        eyebrow="Articles"
+        title="줍줍한 글"
+        description="수집된 기술 블로그 글을 모아봤어요. 토픽, 블로그로 필터링하거나 제목으로 검색해 보세요."
+      />
 
       <Suspense fallback={null}>
         <ExploreSearch />

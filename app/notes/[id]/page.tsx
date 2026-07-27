@@ -9,6 +9,7 @@ import type { Note } from "@/lib/types";
 import { LoginPanel } from "@/components/auth/LoginPanel";
 import { NoteEditor } from "@/components/note/NoteEditor";
 import { NoteMarkdown } from "@/components/note/NoteMarkdown";
+import { RecommendationPanel } from "@/components/note/RecommendationPanel";
 import { BackLink } from "@/components/BackLink";
 import { formatDateTime } from "@/lib/format";
 
@@ -23,6 +24,7 @@ export default function NoteDetailPage({ params }: { params: Promise<{ id: strin
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const load = useCallback(async () => {
     const token = await getIdToken();
@@ -99,53 +101,79 @@ export default function NoteDetailPage({ params }: { params: Promise<{ id: strin
   }
 
   return (
-    <main className="max-w-[760px] mx-auto px-6 py-12">
+    <main className="max-w-[1180px] mx-auto px-6 py-12">
       <BackLink href="/notes" label="← 내 노트로" />
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="min-w-0">
-          <h1 className="text-[32px] font-extrabold tracking-[-0.025em] m-0 break-words">
-            {note.title}
-          </h1>
-          <p className="font-mono text-sm text-muted mt-2">
-            {formatDateTime(note.createdAt)}
-            {note.updatedAt !== note.createdAt ? ` · 수정 ${formatDateTime(note.updatedAt)}` : ""}
-          </p>
+      <div className={`mt-6 ${sidebarOpen ? "flex flex-col lg:flex-row lg:items-stretch gap-6" : ""}`}>
+        <div className={sidebarOpen ? "flex-1 min-w-0" : "max-w-[820px] mx-auto"}>
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="min-w-0">
+              <h1 className="text-[32px] font-extrabold tracking-[-0.025em] m-0 break-words">
+                {note.title}
+              </h1>
+              <p className="font-mono text-sm text-muted mt-2">
+                {formatDateTime(note.createdAt)}
+                {note.updatedAt !== note.createdAt ? ` · 수정 ${formatDateTime(note.updatedAt)}` : ""}
+              </p>
+            </div>
+            <div className="flex gap-2 shrink-0">
+              {!sidebarOpen && (
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-[9px] font-bold text-sm text-primary border border-primary/40 hover:bg-primary-soft transition-colors"
+                >
+                  관련 글 줍줍
+                </button>
+              )}
+              <button
+                onClick={() => setEditing(true)}
+                className="inline-flex items-center bg-primary text-primary-fg px-4 py-2 rounded-[9px] font-bold text-sm hover:opacity-90 transition-opacity"
+              >
+                수정
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="inline-flex items-center px-4 py-2 rounded-[9px] font-bold text-sm text-muted border border-border hover:text-danger hover:border-danger transition-colors disabled:opacity-60"
+              >
+                {deleting ? "삭제 중…" : "삭제"}
+              </button>
+            </div>
+          </div>
+
+          {note.keywords.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-4">
+              {note.keywords.map((keyword) => (
+                <span
+                  key={keyword}
+                  className="font-mono text-xs text-muted bg-chip-bg px-2 py-1 rounded-md"
+                >
+                  {keyword}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {actionError && <p className="text-sm text-danger mt-4">{actionError}</p>}
+
+          <article className="mt-8 bg-card border border-border rounded-2xl p-7">
+            <NoteMarkdown content={note.content} />
+          </article>
         </div>
-        <div className="flex gap-2 shrink-0">
-          <button
-            onClick={() => setEditing(true)}
-            className="inline-flex items-center bg-primary text-primary-fg px-4 py-2 rounded-[9px] font-bold text-sm hover:opacity-90 transition-opacity"
-          >
-            수정
-          </button>
-          <button
-            onClick={handleDelete}
-            disabled={deleting}
-            className="inline-flex items-center px-4 py-2 rounded-[9px] font-bold text-sm text-muted border border-border hover:text-danger hover:border-danger transition-colors disabled:opacity-60"
-          >
-            {deleting ? "삭제 중…" : "삭제"}
-          </button>
-        </div>
+
+        {sidebarOpen && (
+          <aside className="w-full lg:w-[400px] lg:shrink-0">
+            <div className="lg:sticky lg:top-20">
+              <RecommendationPanel
+                selectedNote={note}
+                onClose={() => setSidebarOpen(false)}
+                onAnalyzed={(_noteId, keywords) =>
+                  setNote((prev) => (prev ? { ...prev, keywords } : prev))
+                }
+              />
+            </div>
+          </aside>
+        )}
       </div>
-
-      {note.keywords.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mt-4">
-          {note.keywords.map((keyword) => (
-            <span
-              key={keyword}
-              className="font-mono text-xs text-muted bg-chip-bg px-2 py-1 rounded-md"
-            >
-              {keyword}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {actionError && <p className="text-sm text-danger mt-4">{actionError}</p>}
-
-      <article className="mt-8 bg-card border border-border rounded-2xl p-7">
-        <NoteMarkdown content={note.content} />
-      </article>
     </main>
   );
 }

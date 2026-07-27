@@ -7,6 +7,7 @@ import { getMember } from "@/lib/api/members";
 import { LoginPanel } from "@/components/auth/LoginPanel";
 import { AdminRuns } from "@/components/admin/AdminRuns";
 import { AdminBlogs } from "@/components/admin/AdminBlogs";
+import { PageHeader } from "@/components/PageHeader";
 import type { MemberRole } from "@/lib/types";
 
 export default function AdminPage() {
@@ -69,10 +70,11 @@ export default function AdminPage() {
 
   return (
     <main className="max-w-[1100px] mx-auto px-6 py-12">
-      <h1 className="text-[36px] font-extrabold tracking-[-0.025em] m-0">관리자</h1>
-      <p className="text-base text-muted mt-2 mb-10">
-        수집 파이프라인 실행 이력과 블로그 소스를 관리하세요.
-      </p>
+      <PageHeader
+        eyebrow="Admin"
+        title="관리자"
+        description="수집 파이프라인 실행 이력과 블로그 소스를 관리하세요."
+      />
 
       <section className="mb-12">
         <h2 className="text-xl font-bold mb-4">실행 이력</h2>

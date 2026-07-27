@@ -42,12 +42,23 @@ export function BookmarkButton({
       onClick={toggle}
       disabled={pending}
       aria-pressed={bookmarked}
-      aria-label={bookmarked ? "별표 해제" : "별표"}
-      className={`shrink-0 border-none bg-transparent p-0 text-lg leading-none cursor-pointer transition-colors disabled:opacity-60 ${
+      aria-label={bookmarked ? "저장 해제" : "저장"}
+      className={`shrink-0 border-none bg-transparent p-0 leading-none cursor-pointer transition-colors disabled:opacity-60 ${
         bookmarked ? "text-primary" : "text-muted hover:text-primary"
       } ${className ?? ""}`}
     >
-      {bookmarked ? "★" : "☆"}
+      <svg
+        viewBox="0 0 24 24"
+        className="w-[18px] h-[18px]"
+        fill={bookmarked ? "currentColor" : "none"}
+        stroke="currentColor"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+      </svg>
     </button>
   );
 }

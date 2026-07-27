@@ -7,11 +7,11 @@ import { ArchiveNavLink } from "@/components/ArchiveNavLink";
 import { AdminNavLink } from "@/components/AdminNavLink";
 
 const navItemClass =
-  "px-3 py-2 rounded-lg no-underline text-muted font-semibold text-sm hover:bg-chip-bg hover:text-fg transition-colors";
+  "px-3 py-2 rounded-lg no-underline text-fg font-semibold text-sm hover:bg-chip-bg hover:text-primary transition-colors";
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 bg-bg border-b border-border">
+    <header className="sticky top-0 z-50 bg-white border-b border-border">
       <div className="max-w-[1200px] mx-auto px-6 py-[13px] flex items-center gap-5">
         <Link
           href="/"
