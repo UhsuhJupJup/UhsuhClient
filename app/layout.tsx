@@ -12,7 +12,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: "어서줍줍 — 기술 블로그 키워드 구독",
-  description: "토픽, 키워드만 담아두면 기술 블로그의 새 글을 모아드려요.",
+  description: "토픽, 키워드만 담아두면 기술 블로그의 새 글을 주워다드려요",
 };
 
 export default function RootLayout({

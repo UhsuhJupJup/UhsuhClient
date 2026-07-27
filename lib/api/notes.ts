@@ -1,5 +1,5 @@
 import { ApiError } from "@/lib/api/client";
-import type { Note, NoteRecommendation } from "@/lib/types";
+import type { Note, NoteGraph, NoteRecommendation } from "@/lib/types";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
@@ -64,4 +64,11 @@ export async function getRecommendations(
   id: number | string,
 ): Promise<NoteRecommendation> {
   return (await authedFetch(`/api/notes/${id}/recommendations`, token)).json();
+}
+
+export async function getNoteGraph(
+  token: string,
+  id: number | string,
+): Promise<NoteGraph> {
+  return (await authedFetch(`/api/notes/${id}/graph`, token)).json();
 }

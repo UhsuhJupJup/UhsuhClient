@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { getRecommendations } from "@/lib/api/notes";
 import type { Note, NoteRecommendation } from "@/lib/types";
-import { RecommendedArticleCard } from "@/components/note/RecommendedArticleCard";
+import { RecommendationResult } from "@/components/note/RecommendationResult";
 
 type Status = "idle" | "loading" | "ready" | "error";
 
@@ -14,7 +15,7 @@ export function RecommendationPanel({
   onAnalyzed,
 }: {
   selectedNote: Note | null;
-  onClose: () => void;
+  onClose?: () => void;
   onAnalyzed?: (noteId: number, keywords: string[]) => void;
 }) {
   const { getIdToken } = useAuth();
@@ -54,18 +55,29 @@ export function RecommendationPanel({
   return (
     <div className="bg-card border border-border rounded-2xl p-5 lg:max-h-[calc(100vh-7rem)] overflow-y-auto">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-base font-extrabold m-0">AI로 관련 글 줍줍하기</h2>
-        <button
-          onClick={onClose}
-          aria-label="닫기"
-          className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-muted hover:bg-chip-bg hover:text-fg transition-colors"
-        >
-          ✕
-        </button>
+        <div className="flex items-center gap-2">
+          <h2 className="text-base font-extrabold m-0">관련 글 줍줍</h2>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-acorn bg-acorn-soft px-1.5 py-0.5 rounded">
+            AI
+          </span>
+        </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            aria-label="닫기"
+            className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-muted hover:bg-chip-bg hover:text-fg transition-colors"
+          >
+            ✕
+          </button>
+        )}
+      </div>
+
+      <div className="flex justify-center pt-1 pb-4">
+        <Image src="/mascot-icon.png" alt="" width={88} height={88} className="opacity-90" />
       </div>
 
       {!selectedNote ? (
-        <p className="text-sm text-muted text-center py-10">왼쪽 목록에서 노트를 선택하세요.</p>
+        <p className="text-sm text-muted text-center">노트를 고르면 관련 글을 주워올게요.</p>
       ) : (
         <>
           <div className="border border-border rounded-xl p-3 bg-surface">
@@ -80,11 +92,11 @@ export function RecommendationPanel({
           </button>
 
           {status === "loading" && (
-            <div className="mt-5 flex flex-col gap-3">
-              {Array.from({ length: 2 }).map((_, index) => (
-                <div key={index} className="border border-border rounded-xl p-3 flex flex-col gap-2">
-                  <div className="h-3 w-20 bg-skeleton rounded" />
-                  <div className="h-4 w-full bg-skeleton rounded" />
+            <div className="mt-5 flex flex-col gap-1">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="flex flex-col gap-2 py-3">
+                  <div className="h-3.5 w-full bg-skeleton rounded" />
+                  <div className="h-2.5 w-24 bg-skeleton rounded" />
                 </div>
               ))}
             </div>
@@ -104,31 +116,7 @@ export function RecommendationPanel({
               {data.keywords.length === 0 ? (
                 <p className="text-sm text-muted">이 노트에서 키워드를 추출하지 못했어요.</p>
               ) : (
-                <>
-                  <div className="flex flex-wrap items-center gap-1.5 text-sm text-fg">
-                    <span>해당 글은</span>
-                    {data.keywords.map((keyword) => (
-                      <span
-                        key={keyword}
-                        className="font-mono text-xs text-primary bg-primary-soft px-2 py-1 rounded-md"
-                      >
-                        {keyword}
-                      </span>
-                    ))}
-                    <span>키워드로 분류됐습니다.</span>
-                  </div>
-
-                  <p className="mt-6 mb-3 text-sm font-bold text-fg">관련 글입니다.</p>
-                  {data.articles.length > 0 ? (
-                    <div className="flex flex-col gap-3">
-                      {data.articles.map((article) => (
-                        <RecommendedArticleCard key={article.articleId} article={article} />
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted">이 키워드와 겹치는 줍줍한 글이 아직 없어요.</p>
-                  )}
-                </>
+                <RecommendationResult noteId={selectedNote.id} recommendation={data} />
               )}
             </div>
           )}

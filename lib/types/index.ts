@@ -94,6 +94,25 @@ export interface NoteRecommendation {
   articles: RecommendedArticle[];
 }
 
+export interface GraphNode {
+  id: string;
+  type: "note" | "keyword" | "article";
+  label: string;
+  inNote: boolean | null;
+  rank: number | null;
+}
+
+export interface GraphEdge {
+  source: string;
+  target: string;
+  weight: number | null;
+}
+
+export interface NoteGraph {
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+}
+
 export type MemberRole = "USER" | "ADMIN";
 
 export interface Member {

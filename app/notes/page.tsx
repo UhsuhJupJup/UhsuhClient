@@ -1,12 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { getNotes } from "@/lib/api/notes";
 import type { Note } from "@/lib/types";
 import { LoginPanel } from "@/components/auth/LoginPanel";
 import { RecommendationPanel } from "@/components/note/RecommendationPanel";
+import { PageHeader } from "@/components/PageHeader";
 import { formatDateTime } from "@/lib/format";
 import { stripMarkdown } from "@/lib/markdown";
 
@@ -55,20 +57,21 @@ export default function NotesPage() {
 
   return (
     <main className="max-w-[1180px] mx-auto px-6 py-12">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-[36px] font-extrabold tracking-[-0.025em] m-0">내 노트</h1>
-          <p className="text-base text-muted mt-2">학습한 내용을 기록하고 모아보세요.</p>
-        </div>
-        <Link
-          href="/notes/new"
-          className="inline-flex items-center bg-primary text-primary-fg px-4 py-2 rounded-[9px] font-bold text-sm no-underline hover:opacity-90 transition-opacity whitespace-nowrap"
-        >
-          + 새 노트
-        </Link>
-      </div>
+      <PageHeader
+        eyebrow="Notes"
+        title="내 노트"
+        description="학습한 내용을 기록하고 모아보세요."
+        action={
+          <Link
+            href="/notes/new"
+            className="inline-flex items-center bg-primary text-primary-fg px-4 py-2 rounded-[9px] font-bold text-sm no-underline hover:opacity-90 transition-opacity whitespace-nowrap"
+          >
+            + 새 노트
+          </Link>
+        }
+      />
 
-      <div className="mt-8 flex flex-col lg:flex-row lg:items-start gap-6">
+      <div className="flex flex-col lg:flex-row lg:items-stretch gap-6">
         <div className="flex-1 min-w-0">
           {error ? (
             <p className="text-muted">노트를 불러오지 못했어요.</p>
@@ -136,7 +139,7 @@ export default function NotesPage() {
         {hasNotes && (
           <aside
             className={`w-full transition-[width] duration-300 ${
-              workspaceOpen ? "lg:w-[400px]" : "lg:w-[240px]"
+              workspaceOpen ? "lg:w-[520px]" : "lg:w-[240px]"
             } lg:shrink-0`}
           >
             <div className="lg:sticky lg:top-20">
@@ -151,13 +154,23 @@ export default function NotesPage() {
                   }
                 />
               ) : (
-                <button
-                  onClick={() => setWorkspaceOpen(true)}
-                  className="w-full text-left bg-card border border-border rounded-2xl p-5 hover:border-primary transition-colors"
-                >
-                  <p className="font-bold text-fg m-0">AI로 관련 글 줍줍하기 →</p>
-                  <p className="text-sm text-muted mt-1.5 mb-0">노트를 골라 관련된 줍줍한 글을 찾아드려요.</p>
-                </button>
+                <div className="w-full bg-card border border-border rounded-2xl p-5">
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="text-base font-extrabold text-fg">관련 글 줍줍</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-acorn bg-acorn-soft px-1.5 py-0.5 rounded">
+                      AI
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-center text-center py-10 gap-4">
+                    <Image src="/mascot-icon.png" alt="" width={88} height={88} className="opacity-90" />
+                    <button
+                      onClick={() => setWorkspaceOpen(true)}
+                      className="inline-flex items-center gap-1.5 bg-primary text-primary-fg px-4 py-2 rounded-[9px] font-bold text-sm hover:opacity-90 transition-opacity"
+                    >
+                      줍줍 시작하기 →
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
           </aside>

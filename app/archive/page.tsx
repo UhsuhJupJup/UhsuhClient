@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth/AuthProvider";
 import { LoginPanel } from "@/components/auth/LoginPanel";
 import { ArticleCard } from "@/components/ArticleCard";
 import { getBookmarks, getNotifications } from "@/lib/api/archive";
+import { PageHeader } from "@/components/PageHeader";
 import type { ArticleCardData } from "@/lib/types";
 
 type TabKey = "sent" | "star";
@@ -85,10 +86,11 @@ export default function ArchivePage() {
 
   return (
     <main className="max-w-[760px] mx-auto px-6 py-12">
-      <h1 className="text-[36px] font-extrabold tracking-[-0.025em] m-0">보관함</h1>
-      <p className="text-base text-muted mt-2 mb-8">
-        보낸 글과 별표로 저장한 글을 다시 찾아볼 수 있어요.
-      </p>
+      <PageHeader
+        eyebrow="Library"
+        title="보관함"
+        description="보낸 글과 저장한 글을 다시 찾아볼 수 있어요."
+      />
 
       <div className="flex gap-1.5 mb-8">
         <button
@@ -107,7 +109,7 @@ export default function ArchivePage() {
             tab === "star" ? "bg-primary text-primary-fg" : "text-muted hover:text-fg hover:bg-chip-bg"
           }`}
         >
-          별표
+          저장
         </button>
       </div>
 
@@ -125,8 +127,8 @@ export default function ArchivePage() {
           />
         ) : (
           <ArchiveEmpty
-            title="별표한 글이 없어요"
-            body="글에서 ☆를 눌러 따로 모아보세요."
+            title="저장한 글이 없어요"
+            body="글에서 저장 아이콘을 눌러 따로 모아보세요."
             ctaHref="/explore"
             ctaLabel="글 둘러보기 →"
           />
