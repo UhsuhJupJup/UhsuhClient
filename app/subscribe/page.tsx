@@ -38,7 +38,7 @@ export default function SubscribePage() {
   }
 
   return (
-    <main className="max-w-[980px] mx-auto px-6 py-12">
+    <main className="max-w-[1040px] mx-auto px-6 py-12">
       <SubscriptionEditor />
     </main>
   );

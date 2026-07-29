@@ -2,8 +2,8 @@ import { apiGet } from "@/lib/api/client";
 import type { ArticleDetail, ArticlePage } from "@/lib/types";
 
 export interface ArticleQuery {
-  topicId?: number;
-  keywordId?: number;
+  topicIds?: number[];
+  keywordIds?: number[];
   blogId?: number;
   q?: string;
   page?: number;
@@ -12,8 +12,8 @@ export interface ArticleQuery {
 
 export function getArticles(query: ArticleQuery = {}): Promise<ArticlePage> {
   const params = new URLSearchParams();
-  if (query.topicId) params.set("topicId", String(query.topicId));
-  if (query.keywordId) params.set("keywordId", String(query.keywordId));
+  if (query.topicIds?.length) params.set("topicIds", query.topicIds.join(","));
+  if (query.keywordIds?.length) params.set("keywordIds", query.keywordIds.join(","));
   if (query.blogId) params.set("blogId", String(query.blogId));
   if (query.q) params.set("q", query.q);
   if (query.page) params.set("page", String(query.page));
