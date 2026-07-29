@@ -65,7 +65,7 @@ export default async function LandingPage() {
             {topics.map((topic) => (
               <Link
                 key={topic.id}
-                href={`/explore?tab=topic&topicId=${topic.id}`}
+                href={`/explore?tab=topic&topicIds=${topic.id}`}
                 className="font-mono text-[15px] text-fg bg-white border border-border px-[18px] py-[11px] rounded-[10px] no-underline font-medium hover:border-primary hover:text-primary hover:bg-primary-soft transition-colors"
               >
                 {topic.name}
