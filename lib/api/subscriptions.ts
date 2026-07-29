@@ -30,13 +30,12 @@ export async function getSubscriptions(token: string): Promise<Subscriptions> {
 
 export async function replaceSubscriptions(
   token: string,
-  topicIds: number[],
   keywordIds: number[],
 ): Promise<Subscriptions> {
   const response = await authedFetch("/api/subscriptions", token, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ topicIds, keywordIds }),
+    body: JSON.stringify({ topicIds: [], keywordIds }),
   });
   return response.json();
 }
