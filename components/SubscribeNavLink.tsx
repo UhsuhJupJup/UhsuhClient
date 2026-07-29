@@ -19,7 +19,7 @@ export function SubscribeNavLink({ className }: { className?: string }) {
       const token = await getIdToken();
       if (token) {
         const subscriptions = await getSubscriptions(token);
-        if (subscriptions.topics.length > 0 || subscriptions.keywords.length > 0) {
+        if (subscriptions.keywords.length > 0) {
           target = "/manage";
         }
       }
