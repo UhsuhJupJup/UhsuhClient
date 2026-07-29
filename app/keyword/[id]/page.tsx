@@ -24,7 +24,7 @@ export default async function KeywordDetailPage({
     if (error instanceof ApiError && error.status === 404) notFound();
     throw error;
   }
-  const { content: articles } = await getArticles({ keywordId, size: 20 });
+  const { content: articles } = await getArticles({ keywordIds: [keywordId], size: 20 });
 
   return (
     <main className="max-w-[1000px] mx-auto px-6 py-12">
