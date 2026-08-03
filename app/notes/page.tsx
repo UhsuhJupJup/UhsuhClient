@@ -8,14 +8,18 @@ import { getNotes } from "@/lib/api/notes";
 import type { Note } from "@/lib/types";
 import { LoginPanel } from "@/components/auth/LoginPanel";
 import { RecommendationPanel } from "@/components/note/RecommendationPanel";
+import { NoteGlobalGraphPanel } from "@/components/note/NoteGlobalGraphPanel";
 import { PageHeader } from "@/components/PageHeader";
 import { formatDateTime } from "@/lib/format";
 import { stripMarkdown } from "@/lib/markdown";
+
+const tabBase = "px-3.5 py-2 rounded-lg font-semibold text-sm transition-colors";
 
 export default function NotesPage() {
   const { user, loading, getIdToken } = useAuth();
   const [notes, setNotes] = useState<Note[] | null>(null);
   const [error, setError] = useState(false);
+  const [tab, setTab] = useState<"list" | "graph">("list");
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const closeWorkspace = useCallback(() => {
@@ -71,7 +75,27 @@ export default function NotesPage() {
         }
       />
 
-      <div className="flex flex-col lg:flex-row lg:items-stretch gap-6">
+      <div className="flex gap-1.5 mt-6">
+        <button
+          onClick={() => setTab("list")}
+          className={`${tabBase} ${tab === "list" ? "bg-primary text-primary-fg" : "text-muted hover:text-fg hover:bg-chip-bg"}`}
+        >
+          글 목록
+        </button>
+        <button
+          onClick={() => setTab("graph")}
+          className={`${tabBase} ${tab === "graph" ? "bg-primary text-primary-fg" : "text-muted hover:text-fg hover:bg-chip-bg"}`}
+        >
+          지식 그래프
+        </button>
+      </div>
+
+      {tab === "graph" ? (
+        <div className="mt-6">
+          <NoteGlobalGraphPanel />
+        </div>
+      ) : (
+      <div className="flex flex-col lg:flex-row lg:items-stretch gap-6 mt-6">
         <div className="flex-1 min-w-0">
           {error ? (
             <p className="text-muted">노트를 불러오지 못했어요.</p>
@@ -176,6 +200,7 @@ export default function NotesPage() {
           </aside>
         )}
       </div>
+      )}
     </main>
   );
 }

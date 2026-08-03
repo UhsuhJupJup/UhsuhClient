@@ -100,6 +100,7 @@ export interface GraphNode {
   label: string;
   inNote: boolean | null;
   rank: number | null;
+  weight: number | null;
 }
 
 export interface GraphEdge {
