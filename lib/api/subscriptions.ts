@@ -1,27 +1,9 @@
-import { ApiError } from "@/lib/api/client";
+import { authedFetch } from "@/lib/api/client";
 import type { Keyword, Topic } from "@/lib/types";
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
 
 export interface Subscriptions {
   topics: Topic[];
   keywords: Keyword[];
-}
-
-async function authedFetch(
-  path: string,
-  token: string,
-  init?: RequestInit,
-): Promise<Response> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...init,
-    headers: { ...(init?.headers ?? {}), Authorization: `Bearer ${token}` },
-  });
-  if (!response.ok) {
-    throw new ApiError(response.status, `${init?.method ?? "GET"} ${path} (${response.status})`);
-  }
-  return response;
 }
 
 export async function getSubscriptions(token: string): Promise<Subscriptions> {

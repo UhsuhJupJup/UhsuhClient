@@ -16,6 +16,7 @@ import {
   type User,
 } from "firebase/auth";
 import { auth, isFirebaseConfigured } from "@/lib/firebase/client";
+import { registerAuthHandlers } from "@/lib/api/client";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
@@ -95,6 +96,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await ensureMemberSynced(user);
     return user.getIdToken();
   }, [user]);
+
+  useEffect(() => {
+    registerAuthHandlers({
+      getToken: (forceRefresh = false) =>
+        user ? user.getIdToken(forceRefresh) : Promise.resolve(null),
+      onSessionExpired: () => {
+        void logout();
+      },
+    });
+  }, [user, logout]);
 
   return (
     <AuthContext.Provider
