@@ -10,6 +10,7 @@ interface SimNode {
   label: string;
   inNote: boolean;
   rank: number | null;
+  weight: number | null;
   r: number;
   x: number;
   y: number;
@@ -115,6 +116,10 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
       .filter((node) => node.type === "article" && node.rank != null)
       .map((node) => node.rank as number);
     const maxRank = ranks.length ? Math.max(...ranks) : 1;
+    const weights = nodes
+      .filter((node) => node.type === "keyword" && node.weight != null)
+      .map((node) => node.weight as number);
+    const maxWeight = weights.length ? Math.max(...weights) : 0;
 
     const simNodes: SimNode[] = nodes.map((node) => {
       const deg = degree.get(node.id) ?? 0;
@@ -125,7 +130,10 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
         const rank = node.rank ?? maxRank;
         r = Math.max(8, Math.min(16, 9 + (maxRank - rank) * 1.4));
       } else {
-        const base = 5 + Math.min(7, deg * 0.8);
+        const base =
+          maxWeight > 0 && node.weight != null
+            ? 5 + 11 * Math.sqrt((node.weight as number) / maxWeight)
+            : 5 + Math.min(7, deg * 0.8);
         r = node.inNote === true ? base + 2 : base;
       }
       return {
@@ -134,6 +142,7 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
         label: node.label,
         inNote: node.inNote === true,
         rank: node.rank,
+        weight: node.weight,
         r,
         x: 0,
         y: 0,
@@ -387,9 +396,11 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
               ? "내 노트"
               : node.type === "article"
                 ? `추천 ${node.rank ?? "-"}위`
-                : node.inNote
-                  ? "노트 키워드"
-                  : "관련 키워드",
+                : node.weight != null
+                  ? `글 ${node.weight}개${node.inNote ? " · 노트 키워드" : ""}`
+                  : node.inNote
+                    ? "노트 키워드"
+                    : "관련 키워드",
         });
         canvas!.style.cursor = node.type === "note" ? "grab" : "pointer";
       } else {
