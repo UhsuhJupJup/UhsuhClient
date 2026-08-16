@@ -37,7 +37,7 @@ export function ExploreGraph() {
           <span className="w-3 h-3 rounded-full" style={{ background: "var(--muted)", opacity: 0.75 }} />
           키워드 · 크기는 글 수, 선은 함께 등장한 정도예요
         </span>
-        <span className="ml-auto font-mono text-xs">드래그 · 호버 · 클릭</span>
+        <span className="ml-auto font-mono text-xs">빈 곳 드래그 이동 · 휠 확대/축소 · 노드 클릭</span>
       </div>
       {status === "loading" && <div className={panelClass}>그래프를 그리는 중…</div>}
       {status === "error" && <div className={panelClass}>그래프를 불러오지 못했어요.</div>}
