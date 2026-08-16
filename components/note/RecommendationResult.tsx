@@ -147,7 +147,7 @@ function MapView({
         <span className="inline-flex items-center gap-1.5">
           <i className="inline-block w-2.5 h-2.5 rounded-full bg-primary" />추천 글
         </span>
-        <span className="ml-auto font-mono">드래그 · 호버 · 클릭</span>
+        <span className="ml-auto font-mono">빈 곳 드래그 이동 · 휠 확대/축소 · 노드 클릭</span>
       </div>
     </div>
   );
