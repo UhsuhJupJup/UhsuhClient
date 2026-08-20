@@ -34,9 +34,9 @@ interface Tip {
   meta: string;
 }
 
-const REP = 9500;
+const REP = 38000;
 const SPRING = 0.05;
-const GRAV = 0.016;
+const GRAV = 0.008;
 const DAMP = 0.85;
 const VMAX = 7;
 const MIN_SCALE = 0.2;
@@ -47,9 +47,9 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 function restLength(kind: SimEdge["kind"]): number {
-  if (kind === "note") return 100;
-  if (kind === "art") return 92;
-  return 130;
+  if (kind === "note") return 200;
+  if (kind === "art") return 184;
+  return 260;
 }
 
 function withAlpha(color: string, alpha: number): string {
@@ -199,7 +199,7 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
 
     function layoutInit() {
       const count = simNodes.length || 1;
-      const radius = 60 + Math.sqrt(count) * 34;
+      const radius = 120 + Math.sqrt(count) * 68;
       simNodes.forEach((node, i) => {
         const t = (i / count) * Math.PI * 2;
         node.x = Math.cos(t) * radius + (Math.random() - 0.5) * 40;
@@ -338,7 +338,7 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
           ctx.fillStyle = withAlpha(colors.primary, 0.55 + 0.45 * t);
         } else {
           ctx.shadowBlur = 0;
-          ctx.fillStyle = node.inNote ? colors.acorn : withAlpha(colors.muted, 0.75);
+          ctx.fillStyle = node.inNote ? colors.acorn : colors.muted;
         }
         ctx.beginPath();
         ctx.arc(node.x, node.y, node.r, 0, Math.PI * 2);
