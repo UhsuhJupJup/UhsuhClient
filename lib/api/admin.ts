@@ -5,6 +5,18 @@ export async function getRuns(token: string, limit = 30): Promise<PipelineRun[]>
   return (await authedFetch(`/api/admin/runs?limit=${limit}`, token)).json();
 }
 
+export interface NotificationRunResult {
+  membersNotified: number;
+  notificationsRecorded: number;
+  failedMembers: number;
+}
+
+export async function triggerNotification(
+  token: string,
+): Promise<NotificationRunResult | null> {
+  return (await authedFetch("/api/admin/runs/notification", token, { method: "POST" })).json();
+}
+
 export async function getAdminBlogs(token: string): Promise<AdminBlog[]> {
   return (await authedFetch("/api/admin/blogs", token)).json();
 }
