@@ -8,6 +8,7 @@ import {
   createBlog,
   deactivateBlog,
   getAdminBlogs,
+  updateBlog,
 } from "@/lib/api/admin";
 import type { AdminBlog } from "@/lib/types";
 
@@ -23,6 +24,11 @@ export function AdminBlogs() {
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [pendingId, setPendingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editRssUrl, setEditRssUrl] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const token = await getIdToken();
@@ -79,6 +85,42 @@ export function AdminBlogs() {
       setFormError("상태 변경에 실패했어요. 잠시 후 다시 시도해 주세요.");
     } finally {
       setPendingId(null);
+    }
+  }
+
+  function startEdit(blog: AdminBlog) {
+    setEditingId(blog.id);
+    setEditName(blog.name);
+    setEditRssUrl(blog.rssUrl);
+    setEditError(null);
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditError(null);
+  }
+
+  async function saveEdit(id: number) {
+    if (!editName.trim() || !editRssUrl.trim()) {
+      setEditError("이름과 RSS URL을 입력해 주세요.");
+      return;
+    }
+    setSavingEdit(true);
+    setEditError(null);
+    try {
+      const token = await getIdToken();
+      if (!token) throw new Error("missing token");
+      await updateBlog(token, id, { name: editName.trim(), rssUrl: editRssUrl.trim() });
+      setEditingId(null);
+      await load();
+    } catch (caught) {
+      if (caught instanceof ApiError && caught.status === 400) {
+        setEditError("입력값을 확인해 주세요.");
+      } else {
+        setEditError("수정에 실패했어요. 잠시 후 다시 시도해 주세요.");
+      }
+    } finally {
+      setSavingEdit(false);
     }
   }
 
@@ -139,46 +181,100 @@ export function AdminBlogs() {
                 </tr>
               </thead>
               <tbody>
-                {blogs.map((blog) => (
-                  <tr key={blog.id} className="border-b border-border last:border-0">
-                    <td className="px-5 py-4 font-medium whitespace-nowrap">{blog.name}</td>
-                    <td className="px-5 py-4 font-mono text-xs text-muted whitespace-nowrap">
-                      {blog.domain}
-                    </td>
-                    <td className="px-5 py-4">
-                      <a
-                        href={blog.rssUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="block max-w-[260px] truncate font-mono text-xs text-muted hover:text-primary"
-                      >
-                        {blog.rssUrl}
-                      </a>
-                    </td>
-                    <td className="px-5 py-4">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
-                          blog.active ? "bg-primary-soft text-primary" : "bg-chip-bg text-muted"
-                        }`}
-                      >
-                        {blog.active ? "활성" : "정지됨"}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4 text-right">
-                      <button
-                        onClick={() => toggle(blog)}
-                        disabled={pendingId === blog.id}
-                        className={`inline-flex items-center px-3.5 py-1.5 rounded-[9px] font-bold text-xs border transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                          blog.active
-                            ? "border-border text-muted hover:border-danger hover:text-danger"
-                            : "border-primary text-primary hover:bg-primary-soft"
-                        }`}
-                      >
-                        {pendingId === blog.id ? "처리 중…" : blog.active ? "정지" : "재개"}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {blogs.map((blog) => {
+                  const editing = editingId === blog.id;
+                  return (
+                    <tr key={blog.id} className="border-b border-border last:border-0 align-top">
+                      <td className="px-5 py-4 font-medium whitespace-nowrap">
+                        {editing ? (
+                          <input
+                            value={editName}
+                            onChange={(event) => setEditName(event.target.value)}
+                            placeholder="이름"
+                            className={`${inputClass} min-w-[160px]`}
+                          />
+                        ) : (
+                          blog.name
+                        )}
+                      </td>
+                      <td className="px-5 py-4 font-mono text-xs text-muted whitespace-nowrap">
+                        {blog.domain}
+                      </td>
+                      <td className="px-5 py-4">
+                        {editing ? (
+                          <input
+                            value={editRssUrl}
+                            onChange={(event) => setEditRssUrl(event.target.value)}
+                            placeholder="RSS URL"
+                            className={`${inputClass} font-mono min-w-[240px]`}
+                          />
+                        ) : (
+                          <a
+                            href={blog.rssUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="block max-w-[260px] truncate font-mono text-xs text-muted hover:text-primary"
+                          >
+                            {blog.rssUrl}
+                          </a>
+                        )}
+                      </td>
+                      <td className="px-5 py-4">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
+                            blog.active ? "bg-primary-soft text-primary" : "bg-chip-bg text-muted"
+                          }`}
+                        >
+                          {blog.active ? "활성" : "정지됨"}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 text-right">
+                        {editing ? (
+                          <div className="flex flex-col items-end gap-1.5">
+                            <div className="flex justify-end gap-2">
+                              <button
+                                onClick={() => saveEdit(blog.id)}
+                                disabled={savingEdit}
+                                className="inline-flex items-center bg-primary text-primary-fg px-3.5 py-1.5 rounded-[9px] font-bold text-xs hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {savingEdit ? "저장 중…" : "저장"}
+                              </button>
+                              <button
+                                onClick={cancelEdit}
+                                disabled={savingEdit}
+                                className="inline-flex items-center px-3.5 py-1.5 rounded-[9px] font-bold text-xs border border-border text-muted hover:text-fg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                취소
+                              </button>
+                            </div>
+                            {editError && <p className="text-xs text-danger m-0">{editError}</p>}
+                          </div>
+                        ) : (
+                          <div className="flex justify-end gap-2">
+                            <button
+                              onClick={() => startEdit(blog)}
+                              disabled={pendingId === blog.id}
+                              className="inline-flex items-center px-3.5 py-1.5 rounded-[9px] font-bold text-xs border border-border text-muted hover:border-primary hover:text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              수정
+                            </button>
+                            <button
+                              onClick={() => toggle(blog)}
+                              disabled={pendingId === blog.id}
+                              className={`inline-flex items-center px-3.5 py-1.5 rounded-[9px] font-bold text-xs border transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                                blog.active
+                                  ? "border-border text-muted hover:border-danger hover:text-danger"
+                                  : "border-primary text-primary hover:bg-primary-soft"
+                              }`}
+                            >
+                              {pendingId === blog.id ? "처리 중…" : blog.active ? "정지" : "재개"}
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

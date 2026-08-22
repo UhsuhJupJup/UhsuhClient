@@ -1,5 +1,10 @@
 import { authedFetch } from "@/lib/api/client";
-import type { AdminBlog, PipelineRun } from "@/lib/types";
+import type {
+  AdminBlog,
+  AdminEmailSubscriber,
+  EmailSendLog,
+  PipelineRun,
+} from "@/lib/types";
 
 export async function getRuns(token: string, limit = 30): Promise<PipelineRun[]> {
   return (await authedFetch(`/api/admin/runs?limit=${limit}`, token)).json();
@@ -33,10 +38,31 @@ export async function createBlog(
   return response.json();
 }
 
+export async function updateBlog(
+  token: string,
+  id: number,
+  body: { name: string; rssUrl: string },
+): Promise<AdminBlog> {
+  const response = await authedFetch(`/api/admin/blogs/${id}`, token, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  return response.json();
+}
+
 export async function deactivateBlog(token: string, id: number): Promise<void> {
   await authedFetch(`/api/admin/blogs/${id}/deactivate`, token, { method: "PATCH" });
 }
 
 export async function activateBlog(token: string, id: number): Promise<void> {
   await authedFetch(`/api/admin/blogs/${id}/activate`, token, { method: "PATCH" });
+}
+
+export async function getEmailSubscribers(token: string): Promise<AdminEmailSubscriber[]> {
+  return (await authedFetch("/api/admin/email-subscriptions", token)).json();
+}
+
+export async function getEmailSendLogs(token: string, limit = 50): Promise<EmailSendLog[]> {
+  return (await authedFetch(`/api/admin/email-send-logs?limit=${limit}`, token)).json();
 }
