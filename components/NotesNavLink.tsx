@@ -9,7 +9,7 @@ export function NotesNavLink({ className }: { className?: string }) {
 
   return (
     <Link href="/notes" className={className}>
-      노트
+      내 노트
     </Link>
   );
 }

@@ -24,10 +24,10 @@ export default async function LandingPage() {
             </p>
             <div className="flex gap-3 flex-wrap">
               <Link
-                href="/subscribe"
+                href="/subscribe/email"
                 className="inline-flex items-center gap-2 bg-primary text-primary-fg px-[26px] py-[15px] rounded-[11px] font-bold text-base no-underline hover:opacity-90 transition-opacity"
               >
-                줍줍 시작하기 →
+                줍줍하기 →
               </Link>
               <Link
                 href="/explore"
