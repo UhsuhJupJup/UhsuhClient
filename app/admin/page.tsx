@@ -7,6 +7,8 @@ import { getMember } from "@/lib/api/members";
 import { LoginPanel } from "@/components/auth/LoginPanel";
 import { AdminRuns } from "@/components/admin/AdminRuns";
 import { AdminBlogs } from "@/components/admin/AdminBlogs";
+import { AdminEmailSubscribers } from "@/components/admin/AdminEmailSubscribers";
+import { AdminEmailSendLogs } from "@/components/admin/AdminEmailSendLogs";
 import { PageHeader } from "@/components/PageHeader";
 import type { MemberRole } from "@/lib/types";
 
@@ -73,7 +75,7 @@ export default function AdminPage() {
       <PageHeader
         eyebrow="Admin"
         title="관리자"
-        description="수집 파이프라인 실행 이력과 블로그 소스를 관리하세요."
+        description="수집 파이프라인 실행 이력과 블로그 소스, 이메일 구독자와 발송 로그를 관리하세요."
       />
 
       <section className="mb-12">
@@ -81,9 +83,19 @@ export default function AdminPage() {
         <AdminRuns />
       </section>
 
-      <section>
+      <section className="mb-12">
         <h2 className="text-xl font-bold mb-4">블로그 관리</h2>
         <AdminBlogs />
+      </section>
+
+      <section className="mb-12">
+        <h2 className="text-xl font-bold mb-4">이메일 구독자</h2>
+        <AdminEmailSubscribers />
+      </section>
+
+      <section>
+        <h2 className="text-xl font-bold mb-4">이메일 발송 로그</h2>
+        <AdminEmailSendLogs />
       </section>
     </main>
   );

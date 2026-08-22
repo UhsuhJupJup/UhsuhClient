@@ -14,6 +14,11 @@ export interface Keyword {
   name: string;
 }
 
+export interface ManagedEmailSubscriptions {
+  email: string;
+  keywords: Keyword[];
+}
+
 export interface ArticleCardData {
   id: number;
   title: string;
@@ -152,4 +157,23 @@ export interface AdminBlog {
   domain: string;
   rssUrl: string;
   active: boolean;
+}
+
+export interface AdminEmailSubscriber {
+  id: number;
+  email: string;
+  verified: boolean;
+  keywords: string[];
+  createdAt: string;
+}
+
+export type EmailRecipientType = "MEMBER" | "EMAIL_SUBSCRIBER";
+
+export interface EmailSendLog {
+  id: number;
+  email: string;
+  recipientType: EmailRecipientType;
+  articleCount: number;
+  subject: string;
+  sentAt: string;
 }

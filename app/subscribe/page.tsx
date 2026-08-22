@@ -26,6 +26,12 @@ export default function SubscribePage() {
               router.replace("/");
             }}
           />
+          <Link
+            href="/subscribe/email"
+            className="flex items-center justify-center w-full mt-3 bg-card border border-border text-fg px-5 py-3.5 rounded-xl font-bold text-base no-underline hover:border-primary hover:text-primary hover:bg-primary-soft transition-colors"
+          >
+            로그인 없이 이메일로 구독하기
+          </Link>
           <p className="text-center text-sm text-muted mt-6">
             먼저 둘러볼까요?{" "}
             <Link href="/explore" className="text-primary font-semibold no-underline">

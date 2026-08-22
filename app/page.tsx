@@ -60,7 +60,6 @@ export default async function LandingPage() {
           <h2 className="text-[30px] font-extrabold tracking-[-0.02em] text-fg mt-2 mb-1.5">
             줍줍하는 토픽
           </h2>
-          <p className="text-[15px] text-muted mb-6">바로 칩을 눌러 키워드를 살펴보세요.</p>
           <div className="flex flex-wrap gap-2.5">
             {topics.map((topic) => (
               <Link
