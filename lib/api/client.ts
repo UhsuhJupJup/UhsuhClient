@@ -32,12 +32,51 @@ export function registerAuthHandlers(handlers: {
   sessionExpiredHandler = handlers.onSessionExpired;
 }
 
+async function readErrorMessage(response: Response): Promise<string | null> {
+  try {
+    const data = (await response.json()) as { message?: unknown };
+    if (typeof data?.message === "string" && data.message.trim()) {
+      return data.message;
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
 export async function apiGet<T>(path: string): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, { cache: "no-store" });
   if (!response.ok) {
-    throw new ApiError(response.status, `API request failed (${response.status}): ${path}`);
+    const message = await readErrorMessage(response);
+    throw new ApiError(response.status, message ?? `API request failed (${response.status}): ${path}`);
   }
   return response.json() as Promise<T>;
+}
+
+async function apiSend<T>(path: string, method: "POST" | "PUT", body?: unknown): Promise<T | null> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method,
+    cache: "no-store",
+    headers: body === undefined ? undefined : { "Content-Type": "application/json" },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  if (!response.ok) {
+    const message = await readErrorMessage(response);
+    throw new ApiError(response.status, message ?? `${method} ${path} (${response.status})`);
+  }
+  if (response.status === 204 || response.status === 202) {
+    return null;
+  }
+  const text = await response.text();
+  return text ? (JSON.parse(text) as T) : null;
+}
+
+export function apiPost<T = null>(path: string, body?: unknown): Promise<T | null> {
+  return apiSend<T>(path, "POST", body);
+}
+
+export function apiPut<T = null>(path: string, body?: unknown): Promise<T | null> {
+  return apiSend<T>(path, "PUT", body);
 }
 
 function sendWithToken(path: string, token: string, init?: RequestInit): Promise<Response> {

@@ -14,6 +14,11 @@ export interface Keyword {
   name: string;
 }
 
+export interface ManagedEmailSubscriptions {
+  email: string;
+  keywords: Keyword[];
+}
+
 export interface ArticleCardData {
   id: number;
   title: string;
