@@ -18,6 +18,41 @@ const recipientLabel: Record<EmailRecipientType, string> = {
   EMAIL_SUBSCRIBER: "비회원",
 };
 
+const KEYWORD_LIMIT = 6;
+
+function SubscriberKeywords({ keywords }: { keywords: string[] }) {
+  const [expanded, setExpanded] = useState(false);
+
+  if (keywords.length === 0) {
+    return <span className="text-xs text-muted">–</span>;
+  }
+
+  const shown = expanded ? keywords : keywords.slice(0, KEYWORD_LIMIT);
+  const hiddenCount = keywords.length - KEYWORD_LIMIT;
+
+  return (
+    <div className="flex flex-wrap gap-1.5 max-w-[420px]">
+      {shown.map((keyword) => (
+        <span
+          key={keyword}
+          className="inline-flex items-center bg-chip-bg text-fg font-mono text-xs px-2.5 py-1 rounded-full"
+        >
+          {keyword}
+        </span>
+      ))}
+      {hiddenCount > 0 && (
+        <button
+          type="button"
+          onClick={() => setExpanded((value) => !value)}
+          className="inline-flex items-center text-xs font-semibold text-primary px-2.5 py-1 rounded-full hover:bg-primary-soft transition-colors"
+        >
+          {expanded ? "접기" : `+${hiddenCount} 더보기`}
+        </button>
+      )}
+    </div>
+  );
+}
+
 export function AdminEmailSubscribers() {
   const { user, getIdToken } = useAuth();
   const [subscribers, setSubscribers] = useState<AdminEmailSubscriber[] | null>(null);
@@ -99,20 +134,7 @@ export function AdminEmailSubscribers() {
                   </span>
                 </td>
                 <td className="px-5 py-4">
-                  {subscriber.keywords.length === 0 ? (
-                    <span className="text-xs text-muted">–</span>
-                  ) : (
-                    <div className="flex flex-wrap gap-1.5 max-w-[420px]">
-                      {subscriber.keywords.map((keyword) => (
-                        <span
-                          key={keyword}
-                          className="inline-flex items-center bg-chip-bg text-fg font-mono text-xs px-2.5 py-1 rounded-full"
-                        >
-                          {keyword}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                  <SubscriberKeywords keywords={subscriber.keywords} />
                 </td>
                 <td className="px-5 py-4 font-mono text-xs text-muted whitespace-nowrap">
                   {formatDate(subscriber.createdAt)}
