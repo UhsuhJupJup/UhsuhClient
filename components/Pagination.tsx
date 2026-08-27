@@ -12,10 +12,12 @@ export function Pagination({
   currentPage,
   totalPages,
   hrefForPage,
+  onNavigate,
 }: {
   currentPage: number;
   totalPages: number;
   hrefForPage: (page: number) => string;
+  onNavigate?: (page: number) => void;
 }) {
   if (totalPages <= 1) return null;
 
@@ -23,31 +25,40 @@ export function Pagination({
   const end = Math.min(totalPages, start + WINDOW - 1);
   const pages = Array.from({ length: end - start + 1 }, (_, i) => start + i);
 
+  const cell = (page: number, label: React.ReactNode, isActive: boolean) =>
+    onNavigate ? (
+      <button
+        key={label === page ? page : `nav-${label}`}
+        type="button"
+        onClick={() => onNavigate(page)}
+        aria-current={isActive ? "page" : undefined}
+        className={`${base} ${isActive ? active : idle}`}
+      >
+        {label}
+      </button>
+    ) : (
+      <Link
+        key={label === page ? page : `nav-${label}`}
+        href={hrefForPage(page)}
+        aria-current={isActive ? "page" : undefined}
+        className={`${base} ${isActive ? active : idle}`}
+      >
+        {label}
+      </Link>
+    );
+
   return (
     <nav className="flex items-center justify-center gap-1.5 mt-10" aria-label="페이지네이션">
       {currentPage > 1 ? (
-        <Link href={hrefForPage(currentPage - 1)} className={`${base} ${idle}`}>
-          이전
-        </Link>
+        cell(currentPage - 1, "이전", false)
       ) : (
         <span className={`${base} ${disabled}`}>이전</span>
       )}
 
-      {pages.map((p) => (
-        <Link
-          key={p}
-          href={hrefForPage(p)}
-          aria-current={p === currentPage ? "page" : undefined}
-          className={`${base} ${p === currentPage ? active : idle}`}
-        >
-          {p}
-        </Link>
-      ))}
+      {pages.map((p) => cell(p, p, p === currentPage))}
 
       {currentPage < totalPages ? (
-        <Link href={hrefForPage(currentPage + 1)} className={`${base} ${idle}`}>
-          다음
-        </Link>
+        cell(currentPage + 1, "다음", false)
       ) : (
         <span className={`${base} ${disabled}`}>다음</span>
       )}
