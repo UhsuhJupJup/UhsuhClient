@@ -4,7 +4,15 @@ import { useState } from "react";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { Logo } from "@/components/Logo";
 
-export function LoginPanel({ onDone }: { onDone?: () => void }) {
+export function LoginPanel({
+  onDone,
+  title = "로그인하고 시작하세요",
+  description = "로그인하면 내가 작성한 노트와 연관된 기술 블로그 글을 추천받을 수 있어요",
+}: {
+  onDone?: () => void;
+  title?: string;
+  description?: string;
+}) {
   const { loginWithGoogle, configured } = useAuth();
   const [error, setError] = useState<string | null>(null);
 
@@ -23,9 +31,9 @@ export function LoginPanel({ onDone }: { onDone?: () => void }) {
       <div className="inline-flex items-center justify-center mb-5">
         <Logo size={72} />
       </div>
-      <h1 className="text-2xl font-extrabold m-0">먼저 로그인하고 시작하세요</h1>
+      <h1 className="text-2xl font-extrabold m-0">{title}</h1>
       <p className="text-base text-muted mt-3 mb-7 max-w-[360px] mx-auto leading-relaxed">
-        로그인하면 구독한 토픽, 키워드가 기기 간에 동기화돼요. 소셜 계정으로 10초면 시작할 수 있어요.
+        {description}
       </p>
 
       {!configured && (
