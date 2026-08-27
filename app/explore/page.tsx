@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
 import { getArticles } from "@/lib/api/articles";
@@ -10,6 +11,14 @@ import { KeywordFilter } from "@/components/KeywordFilter";
 import { TopicFilter } from "@/components/TopicFilter";
 import { Pagination } from "@/components/Pagination";
 import { PageHeader } from "@/components/PageHeader";
+import { SubscribedArticles } from "@/components/SubscribedArticles";
+
+export const metadata: Metadata = {
+  title: "줍줍한 글",
+  description: "기술 블로그에서 주워온 글을 토픽·키워드·블로그로 골라 보세요",
+  alternates: { canonical: "/explore" },
+  openGraph: { url: "/explore", title: "줍줍한 글 | 어서줍줍" },
+};
 
 type ExploreParams = {
   tab?: string;
@@ -38,6 +47,7 @@ const TABS: { key: string; label: string }[] = [
   { key: "blog", label: "블로그" },
   { key: "keyword", label: "키워드" },
   { key: "graph", label: "지식 그래프" },
+  { key: "subscribed", label: "내 구독" },
 ];
 
 export default async function ExplorePage({
@@ -47,10 +57,15 @@ export default async function ExplorePage({
 }) {
   const params = await searchParams;
   const tab =
-    params.tab === "topic" || params.tab === "blog" || params.tab === "keyword" || params.tab === "graph"
+    params.tab === "topic" ||
+    params.tab === "blog" ||
+    params.tab === "keyword" ||
+    params.tab === "graph" ||
+    params.tab === "subscribed"
       ? params.tab
       : "all";
   const isGraph = tab === "graph";
+  const isSubscribed = tab === "subscribed";
   const selectedTopicIds = params.topicIds
     ? params.topicIds.split(",").map(Number).filter((n) => Number.isFinite(n) && n > 0)
     : [];
@@ -62,7 +77,7 @@ export default async function ExplorePage({
 
   const currentPage = params.page && Number(params.page) > 0 ? Number(params.page) : 1;
 
-  const articlePage = isGraph
+  const articlePage = isGraph || isSubscribed
     ? null
     : await getArticles({
         topicIds: tab === "topic" && selectedTopicIds.length ? selectedTopicIds : undefined,
@@ -94,7 +109,7 @@ export default async function ExplorePage({
         description="수집된 기술 블로그 글을 모아봤어요. 토픽, 키워드, 블로그로 필터링하거나 제목으로 검색해 보세요."
       />
 
-      {!isGraph && (
+      {!isGraph && !isSubscribed && (
         <Suspense fallback={null}>
           <ExploreSearch />
         </Suspense>
@@ -105,7 +120,10 @@ export default async function ExplorePage({
           const href =
             item.key === "all"
               ? buildHref({ q })
-              : buildHref({ tab: item.key, q: item.key === "graph" ? undefined : q });
+              : buildHref({
+                  tab: item.key,
+                  q: item.key === "graph" || item.key === "subscribed" ? undefined : q,
+                });
           return (
             <Link
               key={item.key}
@@ -120,6 +138,8 @@ export default async function ExplorePage({
 
       {isGraph ? (
         <ExploreGraph />
+      ) : isSubscribed ? (
+        <SubscribedArticles />
       ) : (
         <>
           {tab === "topic" && (

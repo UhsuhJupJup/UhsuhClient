@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getKeyword } from "@/lib/api/keywords";
@@ -8,6 +9,25 @@ import { BackLink } from "@/components/BackLink";
 import { DetailBadge } from "@/components/DetailBadge";
 import { SubscribeCta } from "@/components/SubscribeCta";
 import { RecentArticles } from "@/components/RecentArticles";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  try {
+    const keyword = await getKeyword(Number(id));
+    return {
+      title: `${keyword.name} 키워드`,
+      description: `${keyword.name} 키워드로 주워온 기술 블로그 글 모음`,
+      alternates: { canonical: `/keyword/${id}` },
+      openGraph: { url: `/keyword/${id}`, title: `${keyword.name} 키워드 | 어서줍줍` },
+    };
+  } catch {
+    return { title: "키워드", alternates: { canonical: `/keyword/${id}` } };
+  }
+}
 
 export default async function KeywordDetailPage({
   params,
