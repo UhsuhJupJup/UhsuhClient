@@ -1,4 +1,5 @@
 import { EmailSubscribeForm } from "@/components/subscription/EmailSubscribeForm";
+import { EmailConfirmResult } from "@/components/subscription/EmailConfirmResult";
 
 export default async function EmailSubscribePage({
   searchParams,
@@ -10,7 +11,11 @@ export default async function EmailSubscribePage({
 
   return (
     <main className="max-w-[1040px] mx-auto px-6 py-12">
-      <EmailSubscribeForm verifyStatus={verifyStatus} />
+      {verifyStatus ? (
+        <EmailConfirmResult status={verifyStatus} />
+      ) : (
+        <EmailSubscribeForm />
+      )}
     </main>
   );
 }
