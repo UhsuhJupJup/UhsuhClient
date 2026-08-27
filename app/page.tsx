@@ -2,12 +2,59 @@ import Image from "next/image";
 import Link from "next/link";
 import { getTopics } from "@/lib/api/topics";
 import { getBlogs } from "@/lib/api/blogs";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+  openGraph: {
+    url: "/",
+    title: `${SITE_NAME} — 기술 블로그 키워드 구독`,
+    description: SITE_DESCRIPTION,
+  },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      url: SITE_URL,
+      name: SITE_NAME,
+      description: SITE_DESCRIPTION,
+      inLanguage: "ko-KR",
+      publisher: { "@id": `${SITE_URL}/#organization` },
+      potentialAction: {
+        "@type": "SearchAction",
+        target: {
+          "@type": "EntryPoint",
+          urlTemplate: `${SITE_URL}/explore?q={search_term_string}`,
+        },
+        "query-input": "required name=search_term_string",
+      },
+    },
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: SITE_NAME,
+      url: SITE_URL,
+      logo: { "@type": "ImageObject", url: `${SITE_URL}/mascot-icon.png` },
+    },
+  ],
+};
 
 export default async function LandingPage() {
   const [topics, blogs] = await Promise.all([getTopics(), getBlogs()]);
 
   return (
     <main className="bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
       <div className="max-w-[1160px] mx-auto px-6">
         <section className="grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-14 items-center pt-20 pb-16">
           <div>
@@ -19,15 +66,19 @@ export default async function LandingPage() {
               <br />
               어서 <span className="text-primary">줍줍</span>하세요.
             </h1>
-            <p className="text-lg leading-[1.7] text-muted mt-6 mb-9 max-w-[440px]">
-              토픽·키워드만 담아두면 기술 블로그의 새 글을 주워다드려요
+            <p className="text-lg leading-[1.7] text-muted mt-6 mb-4 max-w-[440px]">
+              토픽, 키워드만 담아두면 기술 블로그의 새 글을 주워다드려요
+            </p>
+            <p className="inline-flex items-center gap-2 bg-primary-soft text-primary text-sm font-semibold px-3.5 py-2 rounded-full mb-9">
+              <span aria-hidden>🕗</span>
+              매일 아침 8시에 보내드려요
             </p>
             <div className="flex gap-3 flex-wrap">
               <Link
                 href="/subscribe"
                 className="inline-flex items-center gap-2 bg-primary text-primary-fg px-[26px] py-[15px] rounded-[11px] font-bold text-base no-underline hover:opacity-90 transition-opacity"
               >
-                줍줍 시작하기 →
+                무료로 줍줍 시작하기
               </Link>
               <Link
                 href="/explore"

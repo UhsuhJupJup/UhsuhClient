@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getArticle } from "@/lib/api/articles";
@@ -6,6 +7,25 @@ import type { ArticleDetail } from "@/lib/types";
 import { BackLink } from "@/components/BackLink";
 import { BookmarkButton } from "@/components/BookmarkButton";
 import { formatDate } from "@/lib/format";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  try {
+    const article = await getArticle(Number(id));
+    return {
+      title: article.title,
+      description: `${article.blog.name}의 글 — ${article.keywords.map((keyword) => keyword.name).join(", ")}`,
+      alternates: { canonical: `/article/${id}` },
+      openGraph: { url: `/article/${id}`, title: article.title, type: "article" },
+    };
+  } catch {
+    return { title: "글", alternates: { canonical: `/article/${id}` } };
+  }
+}
 
 export default async function ArticleDetailPage({
   params,

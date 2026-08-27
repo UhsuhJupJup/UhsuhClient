@@ -15,7 +15,7 @@ function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
-export function EmailSubscribeForm({ verifyStatus }: { verifyStatus?: "success" | "failed" }) {
+export function EmailSubscribeForm() {
   const [email, setEmail] = useState("");
   const [selectedKeywords, setSelectedKeywords] = useState<Map<number, string>>(new Map());
   const [consent, setConsent] = useState(false);
@@ -75,19 +75,6 @@ export function EmailSubscribeForm({ verifyStatus }: { verifyStatus?: "success" 
         description="로그인 없이 이메일만 등록하면 도토리 알림을 받아요 🐿️"
       />
 
-      {verifyStatus === "success" && (
-        <div className="mb-6 rounded-2xl border border-primary bg-primary-soft px-5 py-4">
-          <p className="m-0 text-sm font-semibold text-primary">구독이 확인됐어요! 이제 알림을 받아요.</p>
-        </div>
-      )}
-      {verifyStatus === "failed" && (
-        <div className="mb-6 rounded-2xl border border-danger bg-danger-soft px-5 py-4">
-          <p className="m-0 text-sm font-semibold text-danger">
-            확인 링크가 만료됐거나 유효하지 않아요. 다시 등록해 주세요.
-          </p>
-        </div>
-      )}
-
       {submitted ? (
         <div className="bg-card border border-border rounded-2xl p-8 text-center max-w-[520px] mx-auto">
           <div className="text-4xl mb-3">📬</div>
@@ -100,9 +87,6 @@ export function EmailSubscribeForm({ verifyStatus }: { verifyStatus?: "success" 
           <p className="text-xs text-muted mt-4 mb-0">
             메일이 안 보이면 스팸함도 확인해 주세요. 링크는 24시간 뒤 만료돼요.
           </p>
-          <Link href="/explore" className="inline-block mt-6 text-sm font-semibold text-primary no-underline">
-            글 탐색하러 가기 →
-          </Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">

@@ -21,6 +21,8 @@ export default function SubscribePage() {
       <main className="max-w-[460px] mx-auto px-6 py-24">
         <div className="bg-card border border-border rounded-[22px] p-9">
           <LoginPanel
+            title="어떻게 줍줍할까요?"
+            description="로그인하면 내가 작성한 노트와 연관된 기술 블로그 글을 추천받을 수 있어요"
             onDone={() => {
               setRedirecting(true);
               router.replace("/");

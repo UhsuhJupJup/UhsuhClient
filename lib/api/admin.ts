@@ -2,6 +2,7 @@ import { authedFetch } from "@/lib/api/client";
 import type {
   AdminBlog,
   AdminEmailSubscriber,
+  AdminOutbox,
   EmailSendLog,
   PipelineRun,
 } from "@/lib/types";
@@ -65,4 +66,12 @@ export async function getEmailSubscribers(token: string): Promise<AdminEmailSubs
 
 export async function getEmailSendLogs(token: string, limit = 50): Promise<EmailSendLog[]> {
   return (await authedFetch(`/api/admin/email-send-logs?limit=${limit}`, token)).json();
+}
+
+export async function getOutbox(token: string, failedLimit = 50): Promise<AdminOutbox> {
+  return (await authedFetch(`/api/admin/outbox?failedLimit=${failedLimit}`, token)).json();
+}
+
+export async function requeueOutbox(token: string, id: number): Promise<void> {
+  await authedFetch(`/api/admin/outbox/${id}/requeue`, token, { method: "POST" });
 }
