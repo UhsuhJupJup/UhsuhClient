@@ -67,7 +67,7 @@ export default async function LandingPage() {
               어서 <span className="text-primary">줍줍</span>하세요.
             </h1>
             <p className="text-lg leading-[1.7] text-muted mt-6 mb-4 max-w-[440px]">
-              토픽·키워드만 담아두면 기술 블로그의 새 글을 주워다드려요
+              토픽, 키워드만 담아두면 기술 블로그의 새 글을 주워다드려요
             </p>
             <p className="inline-flex items-center gap-2 bg-primary-soft text-primary text-sm font-semibold px-3.5 py-2 rounded-full mb-9">
               <span aria-hidden>🕗</span>
@@ -78,7 +78,7 @@ export default async function LandingPage() {
                 href="/subscribe"
                 className="inline-flex items-center gap-2 bg-primary text-primary-fg px-[26px] py-[15px] rounded-[11px] font-bold text-base no-underline hover:opacity-90 transition-opacity"
               >
-                줍줍 시작하기 →
+                무료로 줍줍 시작하기
               </Link>
               <Link
                 href="/explore"

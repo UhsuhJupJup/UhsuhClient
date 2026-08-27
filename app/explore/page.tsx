@@ -15,7 +15,7 @@ import { SubscribedArticles } from "@/components/SubscribedArticles";
 
 export const metadata: Metadata = {
   title: "줍줍한 글",
-  description: "기술 블로그에서 주워온 글을 토픽·키워드·블로그로 골라 보세요",
+  description: "기술 블로그에서 주워온 글을 토픽, 키워드·블로그로 골라 보세요",
   alternates: { canonical: "/explore" },
   openGraph: { url: "/explore", title: "줍줍한 글 | 어서줍줍" },
 };
