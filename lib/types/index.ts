@@ -162,6 +162,7 @@ export interface AdminBlog {
 export interface AdminEmailSubscriber {
   id: number;
   email: string;
+  recipientType: EmailRecipientType;
   verified: boolean;
   keywords: string[];
   createdAt: string;
@@ -176,4 +177,21 @@ export interface EmailSendLog {
   articleCount: number;
   subject: string;
   sentAt: string;
+}
+
+export interface AdminOutboxFailedEntry {
+  id: number;
+  recipient: string;
+  recipientType: EmailRecipientType;
+  subject: string;
+  attempts: number;
+  lastError: string | null;
+  createdAt: string;
+}
+
+export interface AdminOutbox {
+  pending: number;
+  sent: number;
+  failed: number;
+  failedEntries: AdminOutboxFailedEntry[];
 }

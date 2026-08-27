@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { getMember } from "@/lib/api/members";
@@ -9,13 +9,25 @@ import { AdminRuns } from "@/components/admin/AdminRuns";
 import { AdminBlogs } from "@/components/admin/AdminBlogs";
 import { AdminEmailSubscribers } from "@/components/admin/AdminEmailSubscribers";
 import { AdminEmailSendLogs } from "@/components/admin/AdminEmailSendLogs";
+import { AdminOutbox } from "@/components/admin/AdminOutbox";
 import { PageHeader } from "@/components/PageHeader";
 import type { MemberRole } from "@/lib/types";
+
+type TabKey = "runs" | "blogs" | "subscribers" | "sendLogs" | "outbox";
+
+const TABS: { key: TabKey; label: string; render: () => ReactNode }[] = [
+  { key: "runs", label: "실행 이력", render: () => <AdminRuns /> },
+  { key: "blogs", label: "블로그", render: () => <AdminBlogs /> },
+  { key: "subscribers", label: "이메일 구독자", render: () => <AdminEmailSubscribers /> },
+  { key: "sendLogs", label: "발송 로그", render: () => <AdminEmailSendLogs /> },
+  { key: "outbox", label: "아웃박스", render: () => <AdminOutbox /> },
+];
 
 export default function AdminPage() {
   const { user, loading, getIdToken } = useAuth();
   const [role, setRole] = useState<MemberRole | null>(null);
   const [checking, setChecking] = useState(true);
+  const [tab, setTab] = useState<TabKey>("runs");
 
   useEffect(() => {
     if (loading || !user) return;
@@ -78,25 +90,30 @@ export default function AdminPage() {
         description="수집 파이프라인 실행 이력과 블로그 소스, 이메일 구독자와 발송 로그를 관리하세요."
       />
 
-      <section className="mb-12">
-        <h2 className="text-xl font-bold mb-4">실행 이력</h2>
-        <AdminRuns />
-      </section>
+      <div
+        role="tablist"
+        aria-label="관리자 메뉴"
+        className="border-b border-border mb-8 flex gap-1 overflow-x-auto"
+      >
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            type="button"
+            role="tab"
+            aria-selected={tab === t.key}
+            onClick={() => setTab(t.key)}
+            className={`px-4 py-3 text-sm font-bold whitespace-nowrap border-b-2 -mb-px transition-colors ${
+              tab === t.key
+                ? "border-primary text-primary"
+                : "border-transparent text-muted hover:text-fg"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
 
-      <section className="mb-12">
-        <h2 className="text-xl font-bold mb-4">블로그 관리</h2>
-        <AdminBlogs />
-      </section>
-
-      <section className="mb-12">
-        <h2 className="text-xl font-bold mb-4">이메일 구독자</h2>
-        <AdminEmailSubscribers />
-      </section>
-
-      <section>
-        <h2 className="text-xl font-bold mb-4">이메일 발송 로그</h2>
-        <AdminEmailSendLogs />
-      </section>
+      <section>{TABS.find((t) => t.key === tab)?.render()}</section>
     </main>
   );
 }

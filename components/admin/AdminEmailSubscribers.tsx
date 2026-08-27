@@ -4,9 +4,19 @@ import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { getEmailSubscribers } from "@/lib/api/admin";
 import { formatDate } from "@/lib/format";
-import type { AdminEmailSubscriber } from "@/lib/types";
+import type { AdminEmailSubscriber, EmailRecipientType } from "@/lib/types";
 
 const headClass = "text-left font-semibold px-5 py-3 whitespace-nowrap";
+
+const recipientStyle: Record<EmailRecipientType, string> = {
+  MEMBER: "bg-primary-soft text-primary",
+  EMAIL_SUBSCRIBER: "bg-chip-bg text-fg",
+};
+
+const recipientLabel: Record<EmailRecipientType, string> = {
+  MEMBER: "회원",
+  EMAIL_SUBSCRIBER: "비회원",
+};
 
 export function AdminEmailSubscribers() {
   const { user, getIdToken } = useAuth();
@@ -47,7 +57,7 @@ export function AdminEmailSubscribers() {
   if (subscribers.length === 0) {
     return (
       <div className="bg-card border border-border rounded-2xl px-5 py-16 text-center text-sm text-muted">
-        아직 이메일 구독자가 없어요.
+        아직 구독 중인 이메일이 없어요.
       </div>
     );
   }
@@ -59,15 +69,26 @@ export function AdminEmailSubscribers() {
           <thead>
             <tr className="text-muted border-b border-border">
               <th className={headClass}>이메일</th>
+              <th className={headClass}>유형</th>
               <th className={headClass}>인증</th>
               <th className={`${headClass} whitespace-normal`}>구독 키워드</th>
-              <th className={headClass}>가입일</th>
+              <th className={headClass}>등록일</th>
             </tr>
           </thead>
           <tbody>
             {subscribers.map((subscriber) => (
-              <tr key={subscriber.id} className="border-b border-border last:border-0 align-top">
+              <tr
+                key={`${subscriber.recipientType}-${subscriber.id}`}
+                className="border-b border-border last:border-0 align-top"
+              >
                 <td className="px-5 py-4 font-mono text-xs whitespace-nowrap">{subscriber.email}</td>
+                <td className="px-5 py-4">
+                  <span
+                    className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${recipientStyle[subscriber.recipientType]}`}
+                  >
+                    {recipientLabel[subscriber.recipientType]}
+                  </span>
+                </td>
                 <td className="px-5 py-4">
                   <span
                     className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
