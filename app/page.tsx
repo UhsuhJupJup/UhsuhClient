@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getTopics } from "@/lib/api/topics";
 import { getBlogs } from "@/lib/api/blogs";
+import { BlogLogo } from "@/components/BlogLogo";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 
@@ -141,8 +142,9 @@ export default async function LandingPage() {
               <Link
                 key={blog.id}
                 href={`/explore?tab=blog&blogId=${blog.id}`}
-                className="text-sm text-fg bg-white border border-border px-3.5 py-2.5 rounded-[9px] no-underline font-medium hover:border-primary hover:text-primary transition-colors"
+                className="inline-flex items-center gap-2 text-sm text-fg bg-white border border-border pl-2 pr-3.5 py-2 rounded-[9px] no-underline font-medium hover:border-primary hover:text-primary transition-colors"
               >
+                <BlogLogo name={blog.name} domain={blog.domain} logoUrl={blog.logoUrl} />
                 {blog.name}
               </Link>
             ))}

@@ -7,6 +7,7 @@ export interface Blog {
   id: number;
   name: string;
   domain: string;
+  logoUrl: string | null;
 }
 
 export interface Keyword {
@@ -24,7 +25,7 @@ export interface ArticleCardData {
   title: string;
   url: string;
   publishedAt: string;
-  blog: { id: number; name: string };
+  blog: { id: number; name: string; domain: string; logoUrl: string | null };
   keywords: string[];
 }
 
@@ -157,6 +158,7 @@ export interface AdminBlog {
   domain: string;
   rssUrl: string;
   active: boolean;
+  logoUrl: string | null;
 }
 
 export interface AdminEmailSubscriber {

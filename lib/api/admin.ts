@@ -29,7 +29,7 @@ export async function getAdminBlogs(token: string): Promise<AdminBlog[]> {
 
 export async function createBlog(
   token: string,
-  body: { name: string; domain: string; rssUrl: string },
+  body: { name: string; domain: string; rssUrl: string; logoUrl?: string | null },
 ): Promise<AdminBlog> {
   const response = await authedFetch("/api/admin/blogs", token, {
     method: "POST",
@@ -42,7 +42,7 @@ export async function createBlog(
 export async function updateBlog(
   token: string,
   id: number,
-  body: { name: string; rssUrl: string },
+  body: { name: string; rssUrl: string; logoUrl?: string | null },
 ): Promise<AdminBlog> {
   const response = await authedFetch(`/api/admin/blogs/${id}`, token, {
     method: "PATCH",

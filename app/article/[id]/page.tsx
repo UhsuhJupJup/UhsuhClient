@@ -6,6 +6,7 @@ import { ApiError } from "@/lib/api/client";
 import type { ArticleDetail } from "@/lib/types";
 import { BackLink } from "@/components/BackLink";
 import { BookmarkButton } from "@/components/BookmarkButton";
+import { BlogLogo } from "@/components/BlogLogo";
 import { formatDate } from "@/lib/format";
 
 export async function generateMetadata({
@@ -52,9 +53,7 @@ export default async function ArticleDetailPage({
           href={`/explore?tab=blog&blogId=${article.blog.id}`}
           className="inline-flex items-center gap-2 text-fg no-underline hover:text-primary transition-colors"
         >
-          <span className="inline-flex w-6 h-6 items-center justify-center rounded-md bg-chip-bg text-fg font-bold text-[11px]">
-            {article.blog.name.charAt(0)}
-          </span>
+          <BlogLogo name={article.blog.name} domain={article.blog.domain} logoUrl={article.blog.logoUrl} />
           <span className="font-medium">{article.blog.name}</span>
         </Link>
         <span aria-hidden>·</span>
