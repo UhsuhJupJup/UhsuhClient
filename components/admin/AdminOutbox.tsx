@@ -83,7 +83,7 @@ export function AdminOutbox() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <StatCard label="대기" value={data.pending} tone="text-fg" />
         <StatCard label="발송 완료" value={data.sent} tone="text-primary" />
         <StatCard label="실패" value={data.failed} tone={data.failed > 0 ? "text-danger" : "text-fg"} />
