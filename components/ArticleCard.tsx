@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ArticleCardData } from "@/lib/types";
 import { formatDate } from "@/lib/format";
 import { BookmarkButton } from "@/components/BookmarkButton";
+import { BlogLogo } from "@/components/BlogLogo";
 
 export function ArticleCard({
   article,
@@ -15,9 +16,7 @@ export function ArticleCard({
   return (
     <article className="bg-card border border-border rounded-2xl p-5 flex flex-col gap-3 hover:border-primary hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)] transition-all">
       <div className="flex items-center gap-2 text-[13px] text-muted">
-        <span className="inline-flex w-6 h-6 items-center justify-center rounded-md bg-chip-bg text-fg font-bold text-[11px]">
-          {article.blog.name.charAt(0)}
-        </span>
+        <BlogLogo name={article.blog.name} domain={article.blog.domain} logoUrl={article.blog.logoUrl} />
         <span className="font-medium text-fg">{article.blog.name}</span>
         <span aria-hidden>·</span>
         <span>{formatDate(article.publishedAt)}</span>

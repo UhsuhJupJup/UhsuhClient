@@ -11,6 +11,7 @@ import {
   updateBlog,
 } from "@/lib/api/admin";
 import type { AdminBlog } from "@/lib/types";
+import { BlogLogo } from "@/components/BlogLogo";
 
 const inputClass =
   "w-full bg-surface border border-border rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary";
@@ -21,12 +22,14 @@ export function AdminBlogs() {
   const [name, setName] = useState("");
   const [domain, setDomain] = useState("");
   const [rssUrl, setRssUrl] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [pendingId, setPendingId] = useState<number | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editName, setEditName] = useState("");
   const [editRssUrl, setEditRssUrl] = useState("");
+  const [editLogoUrl, setEditLogoUrl] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
 
@@ -55,10 +58,12 @@ export function AdminBlogs() {
         name: name.trim(),
         domain: domain.trim(),
         rssUrl: rssUrl.trim(),
+        logoUrl: logoUrl.trim() || null,
       });
       setName("");
       setDomain("");
       setRssUrl("");
+      setLogoUrl("");
       await load();
     } catch (caught) {
       if (caught instanceof ApiError && caught.status === 409) {
@@ -92,6 +97,7 @@ export function AdminBlogs() {
     setEditingId(blog.id);
     setEditName(blog.name);
     setEditRssUrl(blog.rssUrl);
+    setEditLogoUrl(blog.logoUrl ?? "");
     setEditError(null);
   }
 
@@ -110,7 +116,7 @@ export function AdminBlogs() {
     try {
       const token = await getIdToken();
       if (!token) throw new Error("missing token");
-      await updateBlog(token, id, { name: editName.trim(), rssUrl: editRssUrl.trim() });
+      await updateBlog(token, id, { name: editName.trim(), rssUrl: editRssUrl.trim(), logoUrl: editLogoUrl.trim() || null });
       setEditingId(null);
       await load();
     } catch (caught) {
@@ -127,7 +133,7 @@ export function AdminBlogs() {
   return (
     <div>
       <form onSubmit={handleAdd} className="bg-card border border-border rounded-2xl p-5 mb-6">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <input
             value={name}
             onChange={(event) => setName(event.target.value)}
@@ -144,6 +150,12 @@ export function AdminBlogs() {
             value={rssUrl}
             onChange={(event) => setRssUrl(event.target.value)}
             placeholder="RSS URL"
+            className={`${inputClass} font-mono`}
+          />
+          <input
+            value={logoUrl}
+            onChange={(event) => setLogoUrl(event.target.value)}
+            placeholder="로고 이미지 URL (선택)"
             className={`${inputClass} font-mono`}
           />
         </div>
@@ -174,6 +186,7 @@ export function AdminBlogs() {
               <thead>
                 <tr className="text-left text-muted border-b border-border">
                   <th className="font-semibold px-5 py-3">이름</th>
+                  <th className="font-semibold px-5 py-3">로고</th>
                   <th className="font-semibold px-5 py-3">도메인</th>
                   <th className="font-semibold px-5 py-3">RSS</th>
                   <th className="font-semibold px-5 py-3">상태</th>
@@ -195,6 +208,18 @@ export function AdminBlogs() {
                           />
                         ) : (
                           blog.name
+                        )}
+                      </td>
+                      <td className="px-5 py-4">
+                        {editing ? (
+                          <input
+                            value={editLogoUrl}
+                            onChange={(event) => setEditLogoUrl(event.target.value)}
+                            placeholder="로고 URL"
+                            className={`${inputClass} font-mono min-w-[200px]`}
+                          />
+                        ) : (
+                          <BlogLogo name={blog.name} domain={blog.domain} logoUrl={blog.logoUrl} className="w-7 h-7" />
                         )}
                       </td>
                       <td className="px-5 py-4 font-mono text-xs text-muted whitespace-nowrap">
