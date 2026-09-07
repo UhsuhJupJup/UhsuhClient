@@ -181,6 +181,22 @@ export interface EmailSendLog {
   sentAt: string;
 }
 
+export interface EmailSendLogDaily {
+  date: string;
+  sentAt: string;
+  total: number;
+  memberCount: number;
+  subscriberCount: number;
+}
+
+export interface PipelineRunPage {
+  content: PipelineRun[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
 export interface AdminOutboxFailedEntry {
   id: number;
   recipient: string;

@@ -4,11 +4,16 @@ import type {
   AdminEmailSubscriber,
   AdminOutbox,
   EmailSendLog,
-  PipelineRun,
+  EmailSendLogDaily,
+  PipelineRunPage,
 } from "@/lib/types";
 
-export async function getRuns(token: string, limit = 30): Promise<PipelineRun[]> {
-  return (await authedFetch(`/api/admin/runs?limit=${limit}`, token)).json();
+export async function getRuns(
+  token: string,
+  page = 0,
+  size = 20,
+): Promise<PipelineRunPage> {
+  return (await authedFetch(`/api/admin/runs?page=${page}&size=${size}`, token)).json();
 }
 
 export interface NotificationRunResult {
@@ -66,6 +71,17 @@ export async function getEmailSubscribers(token: string): Promise<AdminEmailSubs
 
 export async function getEmailSendLogs(token: string, limit = 50): Promise<EmailSendLog[]> {
   return (await authedFetch(`/api/admin/email-send-logs?limit=${limit}`, token)).json();
+}
+
+export async function getEmailSendLogDaily(token: string): Promise<EmailSendLogDaily[]> {
+  return (await authedFetch("/api/admin/email-send-logs/daily", token)).json();
+}
+
+export async function getEmailSendLogsByDate(
+  token: string,
+  date: string,
+): Promise<EmailSendLog[]> {
+  return (await authedFetch(`/api/admin/email-send-logs?date=${date}`, token)).json();
 }
 
 export async function getOutbox(token: string, failedLimit = 50): Promise<AdminOutbox> {
