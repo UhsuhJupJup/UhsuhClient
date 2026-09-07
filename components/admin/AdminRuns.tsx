@@ -4,7 +4,10 @@ import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { getRuns, triggerNotification } from "@/lib/api/admin";
 import { formatDateTime, formatDuration, formatTime } from "@/lib/format";
+import { Pagination } from "@/components/Pagination";
 import type { PipelineRun, PipelineRunStatus, PipelineRunKind } from "@/lib/types";
+
+const PAGE_SIZE = 20;
 
 const statusStyle: Record<PipelineRunStatus, string> = {
   SUCCESS: "bg-primary-soft text-primary",
@@ -35,6 +38,8 @@ type Notice = { kind: "ok" | "warn" | "err"; text: string };
 export function AdminRuns() {
   const { user, getIdToken } = useAuth();
   const [runs, setRuns] = useState<PipelineRun[] | null>(null);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState(false);
   const [sending, setSending] = useState(false);
   const [notice, setNotice] = useState<Notice | null>(null);
@@ -44,11 +49,13 @@ export function AdminRuns() {
       const token = await getIdToken();
       if (!token) return;
       setError(false);
-      setRuns(await getRuns(token));
+      const result = await getRuns(token, page, PAGE_SIZE);
+      setRuns(result.content);
+      setTotalPages(result.totalPages);
     } catch {
       setError(true);
     }
-  }, [getIdToken]);
+  }, [getIdToken, page]);
 
   useEffect(() => {
     void load();
@@ -181,6 +188,15 @@ export function AdminRuns() {
             </table>
           </div>
         </div>
+      )}
+
+      {runs !== null && runs.length > 0 && (
+        <Pagination
+          currentPage={page + 1}
+          totalPages={totalPages}
+          hrefForPage={(p) => `#${p}`}
+          onNavigate={(p) => setPage(p - 1)}
+        />
       )}
     </div>
   );
