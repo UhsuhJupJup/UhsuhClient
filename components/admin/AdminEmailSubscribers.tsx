@@ -97,7 +97,26 @@ export function AdminEmailSubscribers() {
     );
   }
 
+  const memberCount = subscribers.filter((s) => s.recipientType === "MEMBER").length;
+  const subscriberCount = subscribers.length - memberCount;
+
   return (
+    <div className="flex flex-col gap-3">
+    <div className="grid grid-cols-3 gap-3">
+      <div className="bg-card border border-border rounded-2xl px-5 py-4">
+        <div className="text-xs text-muted font-medium">총</div>
+        <div className="mt-1 text-2xl font-bold text-fg">{subscribers.length}</div>
+      </div>
+      <div className="bg-card border border-border rounded-2xl px-5 py-4">
+        <div className="text-xs text-muted font-medium">회원</div>
+        <div className="mt-1 text-2xl font-bold text-primary">{memberCount}</div>
+      </div>
+      <div className="bg-card border border-border rounded-2xl px-5 py-4">
+        <div className="text-xs text-muted font-medium">비회원</div>
+        <div className="mt-1 text-2xl font-bold text-fg">{subscriberCount}</div>
+      </div>
+    </div>
+
     <div className="bg-card border border-border rounded-2xl overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full text-sm border-collapse">
@@ -144,6 +163,7 @@ export function AdminEmailSubscribers() {
           </tbody>
         </table>
       </div>
+    </div>
     </div>
   );
 }
