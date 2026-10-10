@@ -1,8 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getTopics } from "@/lib/api/topics";
+import { getArticles } from "@/lib/api/articles";
 import { getBlogs } from "@/lib/api/blogs";
+import { ArticleCard } from "@/components/ArticleCard";
 import { BlogLogo } from "@/components/BlogLogo";
+import { KeywordTrendGraph } from "@/components/KeywordTrendGraph";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 
@@ -45,8 +47,14 @@ const jsonLd = {
   ],
 };
 
+const RECENT_ARTICLE_COUNT = 6;
+
 export default async function LandingPage() {
-  const [topics, blogs] = await Promise.all([getTopics(), getBlogs()]);
+  const [articlePage, blogs] = await Promise.all([
+    getArticles({ size: RECENT_ARTICLE_COUNT }),
+    getBlogs(),
+  ]);
+  const articles = articlePage.content;
 
   return (
     <main className="bg-white">
@@ -59,10 +67,7 @@ export default async function LandingPage() {
       <div className="max-w-[1160px] mx-auto px-6">
         <section className="grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-14 items-center pt-20 pb-16">
           <div>
-            <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-acorn m-0">
-              기술 블로그 키워드 큐레이션
-            </p>
-            <h1 className="text-[40px] sm:text-[52px] leading-[1.1] font-extrabold tracking-[-0.03em] text-fg mt-4 mb-0">
+            <h1 className="text-[40px] sm:text-[52px] leading-[1.1] font-extrabold tracking-[-0.03em] text-fg m-0">
               관심 기술,
               <br />
               어서 <span className="text-primary">줍줍</span>하세요.
@@ -106,32 +111,41 @@ export default async function LandingPage() {
         <div className="border-t border-border" />
 
         <section className="pt-14 pb-12">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-acorn m-0">
-            Topics
-          </p>
-          <h2 className="text-[30px] font-extrabold tracking-[-0.02em] text-fg mt-2 mb-1.5">
-            줍줍하는 토픽
-          </h2>
-          <div className="flex flex-wrap gap-2.5">
-            {topics.map((topic) => (
-              <Link
-                key={topic.id}
-                href={`/explore?tab=topic&topicIds=${topic.id}`}
-                className="font-mono text-[15px] text-fg bg-white border border-border px-[18px] py-[11px] rounded-[10px] no-underline font-medium hover:border-primary hover:text-primary hover:bg-primary-soft transition-colors"
-              >
-                {topic.name}
-              </Link>
-            ))}
+          <div className="flex items-end justify-between gap-4 mb-6">
+            <h2 className="text-[30px] font-extrabold tracking-[-0.02em] text-fg m-0">
+              최근 줍줍한 글
+            </h2>
+            <Link
+              href="/explore"
+              className="text-sm font-semibold text-muted no-underline hover:text-primary transition-colors"
+            >
+              전체 보기 →
+            </Link>
           </div>
+          {articles.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {articles.map((article) => (
+                <ArticleCard key={article.id} article={article} bookmarkable />
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted m-0">아직 줍줍한 글이 없어요.</p>
+          )}
+        </section>
+
+        <div className="border-t border-border" />
+
+        <section className="pt-14 pb-12">
+          <h2 className="text-[30px] font-extrabold tracking-[-0.02em] text-fg m-0">
+            인기 키워드를 확인하세요
+          </h2>
+          <KeywordTrendGraph />
         </section>
 
         <div className="border-t border-border" />
 
         <section className="pt-14 pb-16">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.22em] text-acorn m-0">
-            Blogs
-          </p>
-          <h2 className="text-[30px] font-extrabold tracking-[-0.02em] text-fg mt-2 mb-1.5">
+          <h2 className="text-[30px] font-extrabold tracking-[-0.02em] text-fg mt-0 mb-1.5">
             수집 중인 블로그
           </h2>
           <p className="text-[15px] text-muted mb-6">
