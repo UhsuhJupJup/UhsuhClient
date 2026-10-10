@@ -33,7 +33,7 @@ interface Tip {
   meta: string;
 }
 
-const GAP = 8;
+const GAP = 6;
 const SPIRAL_GROWTH = 4;
 const SPIRAL_STEP = 10;
 const TYPE_ORDER: Record<GraphNode["type"], number> = { note: 0, article: 1, keyword: 2 };
@@ -95,7 +95,15 @@ function idPart(id: string): string {
   return id.slice(id.indexOf(":") + 1);
 }
 
-export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: GraphEdge[] }) {
+export function KnowledgeGraph({
+  nodes,
+  edges,
+  heightClassName = "h-[480px] sm:h-[580px]",
+}: {
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+  heightClassName?: string;
+}) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const router = useRouter();
@@ -147,7 +155,7 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
       } else {
         if (maxWeight > 0 && node.weight != null) {
           emphasis = Math.sqrt(Math.max(0, node.weight) / maxWeight);
-          font = 10 + 28 * emphasis;
+          font = 13 + 17 * emphasis;
         } else {
           font = 11 + Math.min(4, deg * 0.5);
         }
@@ -219,8 +227,8 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
           continue;
         }
         ctx.font = nodeFont(node);
-        node.hw = ctx.measureText(node.text).width / 2 + node.font * (0.75 + 0.75 * node.emphasis);
-        node.hh = node.font * (0.95 + 0.55 * node.emphasis);
+        node.hw = ctx.measureText(node.text).width / 2 + node.font * (0.6 + 0.6 * node.emphasis);
+        node.hh = node.font * (0.8 + 0.5 * node.emphasis);
       }
     }
 
@@ -583,7 +591,7 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-[480px] sm:h-[580px] overflow-hidden rounded-2xl border border-border bg-surface"
+      className={`relative w-full ${heightClassName} overflow-hidden rounded-2xl border border-border bg-surface`}
     >
       <canvas ref={canvasRef} className="block h-full w-full touch-none" style={{ cursor: "grab" }} />
       <div className="absolute right-3 top-3 z-10 flex flex-col gap-1.5">
