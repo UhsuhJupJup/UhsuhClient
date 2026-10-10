@@ -7,8 +7,10 @@ import { KnowledgeGraph } from "@/components/note/KnowledgeGraph";
 
 type Status = "loading" | "ready" | "error";
 
+const heightClass = "h-[560px] sm:h-[720px]";
+
 const panelClass =
-  "h-[480px] sm:h-[580px] rounded-2xl border border-border bg-surface grid place-items-center text-muted";
+  `${heightClass} rounded-2xl border border-border bg-surface grid place-items-center text-muted`;
 
 export function KeywordTrendGraph() {
   const [graph, setGraph] = useState<NoteGraph | null>(null);
@@ -39,7 +41,7 @@ export function KeywordTrendGraph() {
         (graph.nodes.length === 0 ? (
           <div className={panelClass}>아직 그래프에 표시할 글이 없어요.</div>
         ) : (
-          <KnowledgeGraph nodes={graph.nodes} edges={graph.edges} />
+          <KnowledgeGraph nodes={graph.nodes} edges={graph.edges} heightClassName={heightClass} />
         ))}
     </div>
   );
