@@ -189,7 +189,6 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
     let dpr = 1;
     let initialized = false;
     const view = { scale: 1, offsetX: 0, offsetY: 0 };
-    let dragging: SimNode | null = null;
     let hover: SimNode | null = null;
     let panning = false;
     let panStartX = 0;
@@ -414,7 +413,6 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
         pinchDist = m.dist;
         pinchX = m.cx;
         pinchY = m.cy;
-        dragging = null;
         panning = false;
         pressNode = null;
         hover = null;
@@ -426,16 +424,12 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
       pressX = p.x;
       pressY = p.y;
       moved = false;
-      if (node) {
-        dragging = node;
-        pressNode = node;
-      } else {
-        panning = true;
-        panStartX = p.x;
-        panStartY = p.y;
-        panOrigX = view.offsetX;
-        panOrigY = view.offsetY;
-      }
+      pressNode = node;
+      panning = true;
+      panStartX = p.x;
+      panStartY = p.y;
+      panOrigX = view.offsetX;
+      panOrigY = view.offsetY;
       canvas!.style.cursor = "grabbing";
       setTip(null);
     }
@@ -454,14 +448,8 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
         pinchY = m.cy;
         return;
       }
-      if (dragging) {
-        const world = screenToWorld(p.x, p.y);
-        dragging.x = world.x;
-        dragging.y = world.y;
-        if (Math.abs(p.x - pressX) > 4 || Math.abs(p.y - pressY) > 4) moved = true;
-        return;
-      }
       if (panning) {
+        if (Math.abs(p.x - pressX) > 4 || Math.abs(p.y - pressY) > 4) moved = true;
         view.offsetX = panOrigX + (p.x - panStartX);
         view.offsetY = panOrigY + (p.y - panStartY);
         return;
@@ -509,7 +497,6 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
         }
       }
       if (pointers.size === 0) {
-        dragging = null;
         panning = false;
         pressNode = null;
       }
@@ -526,7 +513,7 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
 
     function onPointerLeave() {
       requestDraw();
-      if (!dragging && !panning && !pinching) {
+      if (!panning && !pinching) {
         hover = null;
         setTip(null);
       }
