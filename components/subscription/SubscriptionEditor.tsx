@@ -124,7 +124,6 @@ export function SubscriptionEditor({ mode = "create" }: { mode?: "create" | "edi
         label={isEdit ? "← 구독 관리로" : "← 탐색으로"}
       />
       <PageHeader
-        eyebrow="Subscribe"
         title={isEdit ? "구독 수정" : "구독 설정"}
         description={
           isEdit

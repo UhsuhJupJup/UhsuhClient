@@ -6,7 +6,6 @@ import { getTopics } from "@/lib/api/topics";
 import { getBlogs } from "@/lib/api/blogs";
 import { ArticleCard } from "@/components/ArticleCard";
 import { ExploreSearch } from "@/components/ExploreSearch";
-import { ExploreGraph } from "@/components/ExploreGraph";
 import { KeywordFilter } from "@/components/KeywordFilter";
 import { TopicFilter } from "@/components/TopicFilter";
 import { Pagination } from "@/components/Pagination";
@@ -46,7 +45,6 @@ const TABS: { key: string; label: string }[] = [
   { key: "topic", label: "토픽" },
   { key: "blog", label: "블로그" },
   { key: "keyword", label: "키워드" },
-  { key: "graph", label: "지식 그래프" },
   { key: "subscribed", label: "내 구독" },
 ];
 
@@ -60,11 +58,9 @@ export default async function ExplorePage({
     params.tab === "topic" ||
     params.tab === "blog" ||
     params.tab === "keyword" ||
-    params.tab === "graph" ||
     params.tab === "subscribed"
       ? params.tab
       : "all";
-  const isGraph = tab === "graph";
   const isSubscribed = tab === "subscribed";
   const selectedTopicIds = params.topicIds
     ? params.topicIds.split(",").map(Number).filter((n) => Number.isFinite(n) && n > 0)
@@ -77,7 +73,7 @@ export default async function ExplorePage({
 
   const currentPage = params.page && Number(params.page) > 0 ? Number(params.page) : 1;
 
-  const articlePage = isGraph || isSubscribed
+  const articlePage = isSubscribed
     ? null
     : await getArticles({
         topicIds: tab === "topic" && selectedTopicIds.length ? selectedTopicIds : undefined,
@@ -104,12 +100,11 @@ export default async function ExplorePage({
   return (
     <main className="max-w-[1200px] mx-auto px-6 py-12">
       <PageHeader
-        eyebrow="Articles"
         title="줍줍한 글"
         description="수집된 기술 블로그 글을 모아봤어요. 토픽, 키워드, 블로그로 필터링하거나 제목으로 검색해 보세요."
       />
 
-      {!isGraph && !isSubscribed && (
+      {!isSubscribed && (
         <Suspense fallback={null}>
           <ExploreSearch />
         </Suspense>
@@ -122,7 +117,7 @@ export default async function ExplorePage({
               ? buildHref({ q })
               : buildHref({
                   tab: item.key,
-                  q: item.key === "graph" || item.key === "subscribed" ? undefined : q,
+                  q: item.key === "subscribed" ? undefined : q,
                 });
           return (
             <Link
@@ -136,9 +131,7 @@ export default async function ExplorePage({
         })}
       </div>
 
-      {isGraph ? (
-        <ExploreGraph />
-      ) : isSubscribed ? (
+      {isSubscribed ? (
         <SubscribedArticles />
       ) : (
         <>

@@ -70,7 +70,6 @@ export function EmailSubscribeForm() {
     <div>
       <BackLink href="/explore" label="← 탐색으로" />
       <PageHeader
-        eyebrow="Email Subscribe"
         title="이메일로 구독하기"
         description="로그인 없이 이메일만 등록하면 도토리 알림을 받아요 🐿️"
       />

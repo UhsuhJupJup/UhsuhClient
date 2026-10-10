@@ -49,7 +49,7 @@ function ManageLinkRequest() {
   return (
     <div className="max-w-[460px] mx-auto">
       <BackLink href="/subscribe/email" label="← 이메일 구독으로" />
-      <PageHeader eyebrow="Manage" title="구독 관리" description="관리 링크를 이메일로 보내드려요." />
+      <PageHeader title="구독 관리" description="관리 링크를 이메일로 보내드려요." />
 
       {requested ? (
         <div className="bg-card border border-border rounded-2xl p-8 text-center">
@@ -176,7 +176,7 @@ function ManageEdit({ token }: { token: string }) {
   if (loadError) {
     return (
       <div className="max-w-[460px] mx-auto">
-        <PageHeader eyebrow="Manage" title="구독 관리" />
+        <PageHeader title="구독 관리" />
         <div className="bg-card border border-border rounded-2xl p-8 text-center">
           <div className="text-4xl mb-3">🍂</div>
           <h2 className="text-lg font-bold m-0">{loadError}</h2>
@@ -203,7 +203,7 @@ function ManageEdit({ token }: { token: string }) {
   return (
     <div>
       <BackLink href="/subscribe/email" label="← 이메일 구독으로" />
-      <PageHeader eyebrow="Manage" title="구독 관리" description="구독 중인 키워드를 바꾸고 저장하세요." />
+      <PageHeader title="구독 관리" description="구독 중인 키워드를 바꾸고 저장하세요." />
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">
         <div className="min-w-0">

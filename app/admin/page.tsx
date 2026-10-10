@@ -85,7 +85,6 @@ export default function AdminPage() {
   return (
     <main className="max-w-[1100px] mx-auto px-6 py-12">
       <PageHeader
-        eyebrow="Admin"
         title="관리자"
         description="수집 파이프라인 실행 이력과 블로그 소스, 이메일 구독자와 발송 로그를 관리하세요."
       />

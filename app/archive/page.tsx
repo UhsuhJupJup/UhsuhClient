@@ -87,7 +87,6 @@ export default function ArchivePage() {
   return (
     <main className="max-w-[760px] mx-auto px-6 py-12">
       <PageHeader
-        eyebrow="Library"
         title="보관함"
         description="보낸 글과 저장한 글을 다시 찾아볼 수 있어요."
       />
