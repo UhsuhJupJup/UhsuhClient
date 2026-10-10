@@ -19,17 +19,11 @@ interface SimNode {
   hh: number;
   x: number;
   y: number;
-  vx: number;
-  vy: number;
-  fx: number;
-  fy: number;
 }
 
 interface SimEdge {
   a: SimNode;
   b: SimNode;
-  kind: "note" | "art" | "kw";
-  weight: number | null;
 }
 
 interface Tip {
@@ -39,12 +33,10 @@ interface Tip {
   meta: string;
 }
 
-const REP = 22000;
-const SPRING = 0.04;
-const GRAV = 0.012;
-const GAP = 16;
-const COLLISION_PASSES = 6;
-const SETTLE_STEPS = 600;
+const GAP = 8;
+const SPIRAL_GROWTH = 4;
+const SPIRAL_STEP = 10;
+const TYPE_ORDER: Record<GraphNode["type"], number> = { note: 0, article: 1, keyword: 2 };
 const PALETTE = [
   "#1f6f4a",
   "#2563eb",
@@ -57,19 +49,11 @@ const PALETTE = [
   "#4f46e5",
   "#0284c7",
 ];
-const DAMP = 0.85;
-const VMAX = 7;
 const MIN_SCALE = 0.2;
 const MAX_SCALE = 4;
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
-}
-
-function restLength(kind: SimEdge["kind"]): number {
-  if (kind === "note") return 170;
-  if (kind === "art") return 150;
-  return 230;
 }
 
 function paletteColor(key: string): string {
@@ -187,10 +171,6 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
         hh: 14,
         x: 0,
         y: 0,
-        vx: 0,
-        vy: 0,
-        fx: 0,
-        fy: 0,
       };
     });
 
@@ -200,19 +180,7 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
       const a = byId.get(edge.source);
       const b = byId.get(edge.target);
       if (!a || !b) continue;
-      const kind =
-        a.type === "note" || b.type === "note"
-          ? "note"
-          : a.type === "article" || b.type === "article"
-            ? "art"
-            : "kw";
-      simEdges.push({ a, b, kind, weight: edge.weight });
-    }
-    const neighbors = new Map<SimNode, Set<SimNode>>();
-    for (const node of simNodes) neighbors.set(node, new Set());
-    for (const edge of simEdges) {
-      neighbors.get(edge.a)!.add(edge.b);
-      neighbors.get(edge.b)!.add(edge.a);
+      simEdges.push({ a, b });
     }
 
     let colors = readColors(container);
@@ -261,96 +229,31 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
       return height > 0 ? clamp(width / height, 1, 2.4) : 1;
     }
 
-    function layoutInit() {
-      const count = simNodes.length || 1;
-      const radius = 80 + Math.sqrt(count) * 44;
+    function layout() {
+      const order = [...simNodes].sort(
+        (a, b) => TYPE_ORDER[a.type] - TYPE_ORDER[b.type] || b.hw * b.hh - a.hw * a.hh,
+      );
       const stretch = aspect();
-      simNodes.forEach((node, i) => {
-        const t = (i / count) * Math.PI * 2;
-        node.x = Math.cos(t) * radius * stretch + (Math.random() - 0.5) * 40;
-        node.y = Math.sin(t) * radius + (Math.random() - 0.5) * 40;
-        node.vx = 0;
-        node.vy = 0;
-      });
-      const note = simNodes.find((node) => node.type === "note");
-      if (note) {
-        note.x = (Math.random() - 0.5) * 20;
-        note.y = (Math.random() - 0.5) * 20;
-      }
-    }
-
-    function step() {
-      for (const node of simNodes) {
-        node.fx = 0;
-        node.fy = 0;
-      }
-      for (let i = 0; i < simNodes.length; i++) {
-        for (let j = i + 1; j < simNodes.length; j++) {
-          const a = simNodes[i];
-          const b = simNodes[j];
-          const dx = a.x - b.x;
-          const dy = a.y - b.y;
-          let d2 = dx * dx + dy * dy;
-          if (d2 < 1) d2 = 1;
-          const d = Math.sqrt(d2);
-          const f = REP / d2;
-          const ux = dx / d;
-          const uy = dy / d;
-          a.fx += ux * f;
-          a.fy += uy * f;
-          b.fx -= ux * f;
-          b.fy -= uy * f;
-        }
-      }
-      for (const edge of simEdges) {
-        const { a, b } = edge;
-        const dx = b.x - a.x;
-        const dy = b.y - a.y;
-        const d = Math.sqrt(dx * dx + dy * dy) || 1;
-        const f = SPRING * (d - restLength(edge.kind));
-        const ux = dx / d;
-        const uy = dy / d;
-        a.fx += ux * f;
-        a.fy += uy * f;
-        b.fx -= ux * f;
-        b.fy -= uy * f;
-      }
-      const squash = aspect();
-      for (const node of simNodes) {
-        node.fx += -node.x * GRAV;
-        node.fy += -node.y * GRAV * squash;
-      }
-      for (const node of simNodes) {
-        if (node === dragging) continue;
-        node.vx = clamp((node.vx + node.fx) * DAMP, -VMAX, VMAX);
-        node.vy = clamp((node.vy + node.fy) * DAMP, -VMAX, VMAX);
-        node.x += node.vx;
-        node.y += node.vy;
-      }
-      for (let pass = 0; pass < COLLISION_PASSES; pass++) separate();
-    }
-
-    function separate() {
-      for (let i = 0; i < simNodes.length; i++) {
-        for (let j = i + 1; j < simNodes.length; j++) {
-          const a = simNodes[i];
-          const b = simNodes[j];
-          const dx = b.x - a.x;
-          const dy = b.y - a.y;
-          const overlapX = a.hw + b.hw + GAP - Math.abs(dx);
-          const overlapY = a.hh + b.hh + GAP - Math.abs(dy);
-          if (overlapX <= 0 || overlapY <= 0) continue;
-          const shareA = a === dragging ? 0 : b === dragging ? 1 : 0.5;
-          if (overlapX < overlapY) {
-            const push = dx < 0 ? -overlapX : overlapX;
-            a.x -= push * shareA;
-            b.x += push * (1 - shareA);
-          } else {
-            const push = dy < 0 ? -overlapY : overlapY;
-            a.y -= push * shareA;
-            b.y += push * (1 - shareA);
+      const placed: SimNode[] = [];
+      for (const node of order) {
+        let theta = 0;
+        for (;;) {
+          const radius = SPIRAL_GROWTH * theta;
+          const x = Math.cos(theta) * radius * stretch;
+          const y = Math.sin(theta) * radius;
+          const blocked = placed.some(
+            (other) =>
+              Math.abs(x - other.x) < node.hw + other.hw + GAP &&
+              Math.abs(y - other.y) < node.hh + other.hh + GAP,
+          );
+          if (!blocked) {
+            node.x = x;
+            node.y = y;
+            break;
           }
+          theta += SPIRAL_STEP / Math.max(radius, SPIRAL_STEP);
         }
+        placed.push(node);
       }
     }
 
@@ -399,51 +302,45 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
         dpr * view.offsetY,
       );
       const focus = hover;
-      const focusNeighbors = focus ? neighbors.get(focus)! : null;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      for (const node of simNodes) drawNode(node, false);
+      if (!focus) return;
+      const linked: SimNode[] = [];
+      ctx.strokeStyle = withAlpha(focus.type === "keyword" ? focus.color : colors.fg, 0.85);
+      ctx.lineWidth = 1.8;
       for (const edge of simEdges) {
-        if (focus && (edge.a === focus || edge.b === focus)) {
-          ctx.strokeStyle = withAlpha(focus.type === "keyword" ? focus.color : colors.fg, 0.85);
-          ctx.lineWidth = 1.8;
-        } else if (focus) {
-          ctx.strokeStyle = withAlpha(colors.muted, 0.05);
-          ctx.lineWidth = 0.7;
-        } else if (edge.kind === "note") {
-          ctx.strokeStyle = withAlpha(colors.accentInk, 0.3);
-          ctx.lineWidth = 1.4;
-        } else if (edge.kind === "art") {
-          ctx.strokeStyle = withAlpha(colors.primary, 0.28);
-          ctx.lineWidth = 1.1;
-        } else {
-          const hot = edge.a.inNote || edge.b.inNote;
-          ctx.strokeStyle = hot ? withAlpha(colors.acorn, 0.4) : withAlpha(colors.muted, 0.14);
-          const weight = edge.weight ?? 1;
-          ctx.lineWidth = hot ? Math.max(0.8, Math.min(3.5, weight * 0.7)) : 0.8;
-        }
+        if (edge.a !== focus && edge.b !== focus) continue;
+        linked.push(edge.a === focus ? edge.b : edge.a);
         ctx.beginPath();
         ctx.moveTo(edge.a.x, edge.a.y);
         ctx.lineTo(edge.b.x, edge.b.y);
         ctx.stroke();
       }
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      for (const node of simNodes) {
-        const dimmed = focus !== null && node !== focus && !focusNeighbors!.has(node);
-        ctx.globalAlpha = dimmed ? 0.22 : 1;
-        ctx.fillStyle =
-          node.type === "note" ? colors.accent : node.type === "article" ? colors.primary : node.color;
-        ctx.beginPath();
-        ctx.roundRect(node.x - node.hw, node.y - node.hh, node.hw * 2, node.hh * 2, Math.min(node.hh, 8 + 8 * node.emphasis));
-        ctx.fill();
-        if (node.inNote || node === focus) {
-          ctx.strokeStyle = colors.fg;
-          ctx.lineWidth = 2;
-          ctx.stroke();
-        }
-        ctx.fillStyle = node.type === "note" ? colors.accentInk : colors.primaryFg;
-        ctx.font = nodeFont(node);
-        ctx.fillText(node.text, node.x, node.y + 0.5);
+      for (const node of linked) drawNode(node, false);
+      drawNode(focus, true);
+    }
+
+    function drawNode(node: SimNode, focused: boolean) {
+      ctx.fillStyle =
+        node.type === "note" ? colors.accent : node.type === "article" ? colors.primary : node.color;
+      ctx.beginPath();
+      ctx.roundRect(
+        node.x - node.hw,
+        node.y - node.hh,
+        node.hw * 2,
+        node.hh * 2,
+        Math.min(node.hh, 8 + 8 * node.emphasis),
+      );
+      ctx.fill();
+      if (node.inNote || focused) {
+        ctx.strokeStyle = colors.fg;
+        ctx.lineWidth = 2;
+        ctx.stroke();
       }
-      ctx.globalAlpha = 1;
+      ctx.fillStyle = node.type === "note" ? colors.accentInk : colors.primaryFg;
+      ctx.font = nodeFont(node);
+      ctx.fillText(node.text, node.x, node.y + 0.5);
     }
 
     function requestDraw() {
@@ -468,8 +365,7 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
       canvas!.style.height = `${height}px`;
       if (!initialized) {
         measureNodes();
-        layoutInit();
-        for (let i = 0; i < SETTLE_STEPS; i++) step();
+        layout();
         fitView();
         initialized = true;
       }
@@ -533,8 +429,6 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
       if (node) {
         dragging = node;
         pressNode = node;
-        node.vx = 0;
-        node.vy = 0;
       } else {
         panning = true;
         panStartX = p.x;
@@ -677,7 +571,8 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
     document.fonts?.ready.then(() => {
       if (disposed) return;
       measureNodes();
-      for (let pass = 0; pass < COLLISION_PASSES; pass++) separate();
+      layout();
+      fitView();
       requestDraw();
     });
 
