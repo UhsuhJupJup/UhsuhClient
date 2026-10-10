@@ -62,7 +62,6 @@ export default function NotesPage() {
   return (
     <main className="max-w-[1180px] mx-auto px-6 py-12">
       <PageHeader
-        eyebrow="Notes"
         title="내 노트"
         description="학습한 내용을 기록하고 모아보세요."
         action={

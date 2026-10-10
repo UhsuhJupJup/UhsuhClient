@@ -10,7 +10,7 @@ type Status = "loading" | "ready" | "error";
 const panelClass =
   "h-[480px] sm:h-[580px] rounded-2xl border border-border bg-surface grid place-items-center text-muted";
 
-export function ExploreGraph() {
+export function KeywordTrendGraph() {
   const [graph, setGraph] = useState<NoteGraph | null>(null);
   const [status, setStatus] = useState<Status>("loading");
 
@@ -32,13 +32,6 @@ export function ExploreGraph() {
 
   return (
     <div className="mt-6">
-      <div className="flex flex-wrap items-center gap-4 mb-4 text-sm text-muted">
-        <span className="inline-flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded-full" style={{ background: "var(--muted)", opacity: 0.75 }} />
-          키워드 · 크기는 글 수, 선은 함께 등장한 정도예요
-        </span>
-        <span className="ml-auto font-mono text-xs">빈 곳 드래그 이동 · 휠 확대/축소 · 노드 클릭</span>
-      </div>
       {status === "loading" && <div className={panelClass}>그래프를 그리는 중…</div>}
       {status === "error" && <div className={panelClass}>그래프를 불러오지 못했어요.</div>}
       {status === "ready" &&

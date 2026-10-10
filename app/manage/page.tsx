@@ -42,7 +42,6 @@ export default function ManagePage() {
   return (
     <main className="max-w-[760px] mx-auto px-6 py-12">
       <PageHeader
-        eyebrow="Subscriptions"
         title="구독 관리"
         description="구독 중인 항목을 확인하고 관리하세요."
       />

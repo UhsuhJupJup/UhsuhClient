@@ -11,7 +11,12 @@ interface SimNode {
   inNote: boolean;
   rank: number | null;
   weight: number | null;
-  r: number;
+  text: string;
+  font: number;
+  emphasis: number;
+  color: string;
+  hw: number;
+  hh: number;
   x: number;
   y: number;
   vx: number;
@@ -34,9 +39,24 @@ interface Tip {
   meta: string;
 }
 
-const REP = 38000;
-const SPRING = 0.05;
-const GRAV = 0.008;
+const REP = 22000;
+const SPRING = 0.04;
+const GRAV = 0.012;
+const GAP = 16;
+const COLLISION_PASSES = 6;
+const SETTLE_STEPS = 600;
+const PALETTE = [
+  "#1f6f4a",
+  "#2563eb",
+  "#7c3aed",
+  "#db2777",
+  "#ea580c",
+  "#b45309",
+  "#0d9488",
+  "#dc2626",
+  "#4f46e5",
+  "#0284c7",
+];
 const DAMP = 0.85;
 const VMAX = 7;
 const MIN_SCALE = 0.2;
@@ -47,9 +67,17 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 function restLength(kind: SimEdge["kind"]): number {
-  if (kind === "note") return 200;
-  if (kind === "art") return 184;
-  return 260;
+  if (kind === "note") return 170;
+  if (kind === "art") return 150;
+  return 230;
+}
+
+function paletteColor(key: string): string {
+  let hash = 0;
+  for (let i = 0; i < key.length; i++) {
+    hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
+  }
+  return PALETTE[hash % PALETTE.length];
 }
 
 function withAlpha(color: string, alpha: number): string {
@@ -107,6 +135,7 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
         accent: get("--accent", "#d7f051"),
         primary: get("--primary", "#1f6f4a"),
         primaryFg: get("--primary-fg", "#ffffff"),
+        accentInk: get("--accent-ink", "#2c3a12"),
         acorn: get("--acorn", "#7c5a3a"),
         muted: get("--muted", "#5c6b62"),
         fg: get("--fg", "#15201a"),
@@ -118,10 +147,6 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
       degree.set(edge.source, (degree.get(edge.source) ?? 0) + 1);
       degree.set(edge.target, (degree.get(edge.target) ?? 0) + 1);
     }
-    const ranks = nodes
-      .filter((node) => node.type === "article" && node.rank != null)
-      .map((node) => node.rank as number);
-    const maxRank = ranks.length ? Math.max(...ranks) : 1;
     const weights = nodes
       .filter((node) => node.type === "keyword" && node.weight != null)
       .map((node) => node.weight as number);
@@ -129,18 +154,20 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
 
     const simNodes: SimNode[] = nodes.map((node) => {
       const deg = degree.get(node.id) ?? 0;
-      let r: number;
+      let font: number;
+      let emphasis = 0;
       if (node.type === "note") {
-        r = 16;
+        font = 14;
       } else if (node.type === "article") {
-        const rank = node.rank ?? maxRank;
-        r = Math.max(8, Math.min(16, 9 + (maxRank - rank) * 1.4));
+        font = 11;
       } else {
-        const base =
-          maxWeight > 0 && node.weight != null
-            ? 5 + 11 * Math.sqrt((node.weight as number) / maxWeight)
-            : 5 + Math.min(7, deg * 0.8);
-        r = node.inNote === true ? base + 2 : base;
+        if (maxWeight > 0 && node.weight != null) {
+          emphasis = Math.sqrt(Math.max(0, node.weight) / maxWeight);
+          font = 10 + 28 * emphasis;
+        } else {
+          font = 11 + Math.min(4, deg * 0.5);
+        }
+        if (node.inNote === true) font += 1;
       }
       return {
         id: node.id,
@@ -149,7 +176,15 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
         inNote: node.inNote === true,
         rank: node.rank,
         weight: node.weight,
-        r,
+        text:
+          node.type === "article"
+            ? String(node.rank ?? "")
+            : truncate(node.label, node.type === "note" ? 16 : 24),
+        font,
+        emphasis,
+        color: paletteColor(node.label),
+        hw: 14,
+        hh: 14,
         x: 0,
         y: 0,
         vx: 0,
@@ -173,6 +208,12 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
             : "kw";
       simEdges.push({ a, b, kind, weight: edge.weight });
     }
+    const neighbors = new Map<SimNode, Set<SimNode>>();
+    for (const node of simNodes) neighbors.set(node, new Set());
+    for (const edge of simEdges) {
+      neighbors.get(edge.a)!.add(edge.b);
+      neighbors.get(edge.b)!.add(edge.a);
+    }
 
     let colors = readColors(container);
     let width = 0;
@@ -181,6 +222,7 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
     let initialized = false;
     const view = { scale: 1, offsetX: 0, offsetY: 0 };
     let dragging: SimNode | null = null;
+    let hover: SimNode | null = null;
     let panning = false;
     let panStartX = 0;
     let panStartY = 0;
@@ -197,12 +239,35 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
     let pinchX = 0;
     let pinchY = 0;
 
+    function nodeFont(node: SimNode): string {
+      if (node.type === "article") return `700 ${node.font}px "JetBrains Mono", ui-monospace, monospace`;
+      return `${node.type === "note" ? 700 : 600} ${node.font}px "Pretendard", sans-serif`;
+    }
+
+    function measureNodes() {
+      for (const node of simNodes) {
+        if (node.type === "article") {
+          node.hw = 14;
+          node.hh = 14;
+          continue;
+        }
+        ctx.font = nodeFont(node);
+        node.hw = ctx.measureText(node.text).width / 2 + node.font * (0.75 + 0.75 * node.emphasis);
+        node.hh = node.font * (0.95 + 0.55 * node.emphasis);
+      }
+    }
+
+    function aspect(): number {
+      return height > 0 ? clamp(width / height, 1, 2.4) : 1;
+    }
+
     function layoutInit() {
       const count = simNodes.length || 1;
-      const radius = 120 + Math.sqrt(count) * 68;
+      const radius = 80 + Math.sqrt(count) * 44;
+      const stretch = aspect();
       simNodes.forEach((node, i) => {
         const t = (i / count) * Math.PI * 2;
-        node.x = Math.cos(t) * radius + (Math.random() - 0.5) * 40;
+        node.x = Math.cos(t) * radius * stretch + (Math.random() - 0.5) * 40;
         node.y = Math.sin(t) * radius + (Math.random() - 0.5) * 40;
         node.vx = 0;
         node.vy = 0;
@@ -250,9 +315,10 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
         b.fx -= ux * f;
         b.fy -= uy * f;
       }
+      const squash = aspect();
       for (const node of simNodes) {
         node.fx += -node.x * GRAV;
-        node.fy += -node.y * GRAV;
+        node.fy += -node.y * GRAV * squash;
       }
       for (const node of simNodes) {
         if (node === dragging) continue;
@@ -260,6 +326,31 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
         node.vy = clamp((node.vy + node.fy) * DAMP, -VMAX, VMAX);
         node.x += node.vx;
         node.y += node.vy;
+      }
+      for (let pass = 0; pass < COLLISION_PASSES; pass++) separate();
+    }
+
+    function separate() {
+      for (let i = 0; i < simNodes.length; i++) {
+        for (let j = i + 1; j < simNodes.length; j++) {
+          const a = simNodes[i];
+          const b = simNodes[j];
+          const dx = b.x - a.x;
+          const dy = b.y - a.y;
+          const overlapX = a.hw + b.hw + GAP - Math.abs(dx);
+          const overlapY = a.hh + b.hh + GAP - Math.abs(dy);
+          if (overlapX <= 0 || overlapY <= 0) continue;
+          const shareA = a === dragging ? 0 : b === dragging ? 1 : 0.5;
+          if (overlapX < overlapY) {
+            const push = dx < 0 ? -overlapX : overlapX;
+            a.x -= push * shareA;
+            b.x += push * (1 - shareA);
+          } else {
+            const push = dy < 0 ? -overlapY : overlapY;
+            a.y -= push * shareA;
+            b.y += push * (1 - shareA);
+          }
+        }
       }
     }
 
@@ -270,12 +361,12 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
       let maxX = -Infinity;
       let maxY = -Infinity;
       for (const node of simNodes) {
-        if (node.x - node.r < minX) minX = node.x - node.r;
-        if (node.y - node.r < minY) minY = node.y - node.r;
-        if (node.x + node.r > maxX) maxX = node.x + node.r;
-        if (node.y + node.r > maxY) maxY = node.y + node.r;
+        if (node.x - node.hw < minX) minX = node.x - node.hw;
+        if (node.y - node.hh < minY) minY = node.y - node.hh;
+        if (node.x + node.hw > maxX) maxX = node.x + node.hw;
+        if (node.y + node.hh > maxY) maxY = node.y + node.hh;
       }
-      const pad = 48;
+      const pad = 24;
       const spanX = Math.max(1, maxX - minX);
       const spanY = Math.max(1, maxY - minY);
       const scale = clamp(
@@ -307,70 +398,60 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
         dpr * view.offsetX,
         dpr * view.offsetY,
       );
+      const focus = hover;
+      const focusNeighbors = focus ? neighbors.get(focus)! : null;
       for (const edge of simEdges) {
-        if (edge.kind === "note") {
-          ctx.strokeStyle = withAlpha(colors.accent, 0.55);
+        if (focus && (edge.a === focus || edge.b === focus)) {
+          ctx.strokeStyle = withAlpha(focus.type === "keyword" ? focus.color : colors.fg, 0.85);
+          ctx.lineWidth = 1.8;
+        } else if (focus) {
+          ctx.strokeStyle = withAlpha(colors.muted, 0.05);
+          ctx.lineWidth = 0.7;
+        } else if (edge.kind === "note") {
+          ctx.strokeStyle = withAlpha(colors.accentInk, 0.3);
           ctx.lineWidth = 1.4;
         } else if (edge.kind === "art") {
           ctx.strokeStyle = withAlpha(colors.primary, 0.28);
           ctx.lineWidth = 1.1;
         } else {
           const hot = edge.a.inNote || edge.b.inNote;
-          ctx.strokeStyle = hot ? withAlpha(colors.acorn, 0.4) : withAlpha(colors.muted, 0.16);
+          ctx.strokeStyle = hot ? withAlpha(colors.acorn, 0.4) : withAlpha(colors.muted, 0.14);
           const weight = edge.weight ?? 1;
-          ctx.lineWidth = hot ? Math.max(0.8, Math.min(3.5, weight * 0.7)) : 0.7;
+          ctx.lineWidth = hot ? Math.max(0.8, Math.min(3.5, weight * 0.7)) : 0.8;
         }
         ctx.beginPath();
         ctx.moveTo(edge.a.x, edge.a.y);
         ctx.lineTo(edge.b.x, edge.b.y);
         ctx.stroke();
       }
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
       for (const node of simNodes) {
-        if (node.type === "note") {
-          ctx.shadowBlur = 18;
-          ctx.shadowColor = withAlpha(colors.accent, 0.7);
-          ctx.fillStyle = colors.accent;
-        } else if (node.type === "article") {
-          const rank = node.rank ?? maxRank;
-          const t = maxRank > 1 ? (maxRank - rank) / (maxRank - 1) : 1;
-          ctx.shadowBlur = 10;
-          ctx.shadowColor = withAlpha(colors.primary, 0.5);
-          ctx.fillStyle = withAlpha(colors.primary, 0.55 + 0.45 * t);
-        } else {
-          ctx.shadowBlur = 0;
-          ctx.fillStyle = node.inNote ? colors.acorn : colors.muted;
-        }
+        const dimmed = focus !== null && node !== focus && !focusNeighbors!.has(node);
+        ctx.globalAlpha = dimmed ? 0.22 : 1;
+        ctx.fillStyle =
+          node.type === "note" ? colors.accent : node.type === "article" ? colors.primary : node.color;
         ctx.beginPath();
-        ctx.arc(node.x, node.y, node.r, 0, Math.PI * 2);
+        ctx.roundRect(node.x - node.hw, node.y - node.hh, node.hw * 2, node.hh * 2, Math.min(node.hh, 8 + 8 * node.emphasis));
         ctx.fill();
-        ctx.shadowBlur = 0;
-
-        if (node.type === "article" && node.rank != null) {
-          ctx.fillStyle = colors.primaryFg;
-          ctx.font = '700 10px "JetBrains Mono", ui-monospace, monospace';
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          ctx.fillText(String(node.rank), node.x, node.y + 0.5);
+        if (node.inNote || node === focus) {
+          ctx.strokeStyle = colors.fg;
+          ctx.lineWidth = 2;
+          ctx.stroke();
         }
-
-        ctx.textAlign = "center";
-        ctx.textBaseline = "top";
-        if (node.type === "note") {
-          ctx.fillStyle = colors.fg;
-          ctx.font = '700 12px "Pretendard", sans-serif';
-          ctx.fillText(truncate(node.label, 16), node.x, node.y + node.r + 5);
-        } else if (node.type === "keyword") {
-          ctx.fillStyle = node.inNote ? colors.fg : colors.muted;
-          ctx.font = `${node.inNote ? "600 " : ""}11px "Pretendard", sans-serif`;
-          ctx.fillText(truncate(node.label, 24), node.x, node.y + node.r + 4);
-        }
+        ctx.fillStyle = node.type === "note" ? colors.accentInk : colors.primaryFg;
+        ctx.font = nodeFont(node);
+        ctx.fillText(node.text, node.x, node.y + 0.5);
       }
+      ctx.globalAlpha = 1;
     }
 
-    function loop() {
-      step();
-      draw();
-      frame = requestAnimationFrame(loop);
+    function requestDraw() {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        draw();
+      });
     }
 
     function resize() {
@@ -386,11 +467,13 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
       canvas!.style.width = `${width}px`;
       canvas!.style.height = `${height}px`;
       if (!initialized) {
+        measureNodes();
         layoutInit();
-        for (let i = 0; i < 320; i++) step();
+        for (let i = 0; i < SETTLE_STEPS; i++) step();
         fitView();
         initialized = true;
       }
+      requestDraw();
     }
 
     function pointerPos(event: PointerEvent) {
@@ -404,13 +487,15 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
 
     function nodeAtScreen(sx: number, sy: number): SimNode | null {
       const world = screenToWorld(sx, sy);
-      const tol = 6 / view.scale;
+      const tol = 4 / view.scale;
       for (let i = simNodes.length - 1; i >= 0; i--) {
         const node = simNodes[i];
-        const dx = world.x - node.x;
-        const dy = world.y - node.y;
-        const reach = node.r + tol;
-        if (dx * dx + dy * dy <= reach * reach) return node;
+        if (
+          Math.abs(world.x - node.x) <= node.hw + tol &&
+          Math.abs(world.y - node.y) <= node.hh + tol
+        ) {
+          return node;
+        }
       }
       return null;
     }
@@ -423,6 +508,7 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
     }
 
     function onPointerDown(event: PointerEvent) {
+      requestDraw();
       const p = pointerPos(event);
       pointers.set(event.pointerId, p);
       canvas!.setPointerCapture(event.pointerId);
@@ -435,10 +521,12 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
         dragging = null;
         panning = false;
         pressNode = null;
+        hover = null;
         setTip(null);
         return;
       }
       const node = nodeAtScreen(p.x, p.y);
+      hover = node;
       pressX = p.x;
       pressY = p.y;
       moved = false;
@@ -459,6 +547,7 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
     }
 
     function onPointerMove(event: PointerEvent) {
+      requestDraw();
       const p = pointerPos(event);
       if (pointers.has(event.pointerId)) pointers.set(event.pointerId, p);
       if (pinching && pointers.size >= 2) {
@@ -484,10 +573,11 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
         return;
       }
       const node = nodeAtScreen(p.x, p.y);
+      hover = node;
       if (node) {
         setTip({
           x: node.x * view.scale + view.offsetX,
-          y: (node.y - node.r) * view.scale + view.offsetY,
+          y: (node.y - node.hh) * view.scale + view.offsetY,
           title: truncate(node.label, 40),
           meta:
             node.type === "note"
@@ -508,6 +598,7 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
     }
 
     function endPointer(event: PointerEvent, allowNavigate: boolean) {
+      requestDraw();
       pointers.delete(event.pointerId);
       try {
         canvas!.releasePointerCapture(event.pointerId);
@@ -540,7 +631,11 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
     }
 
     function onPointerLeave() {
-      if (!dragging && !panning && !pinching) setTip(null);
+      requestDraw();
+      if (!dragging && !panning && !pinching) {
+        hover = null;
+        setTip(null);
+      }
     }
 
     function onWheel(event: WheelEvent) {
@@ -550,12 +645,22 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
       const sy = event.clientY - rect.top;
       zoomAround(Math.exp(-event.deltaY * 0.0015), sx, sy);
       setTip(null);
+      requestDraw();
     }
 
     apiRef.current = {
-      zoomIn: () => zoomAround(1.25, width / 2, height / 2),
-      zoomOut: () => zoomAround(0.8, width / 2, height / 2),
-      reset: () => fitView(),
+      zoomIn: () => {
+        zoomAround(1.25, width / 2, height / 2);
+        requestDraw();
+      },
+      zoomOut: () => {
+        zoomAround(0.8, width / 2, height / 2);
+        requestDraw();
+      },
+      reset: () => {
+        fitView();
+        requestDraw();
+      },
     };
 
     canvas.addEventListener("pointerdown", onPointerDown);
@@ -568,9 +673,16 @@ export function KnowledgeGraph({ nodes, edges }: { nodes: GraphNode[]; edges: Gr
     const observer = new ResizeObserver(resize);
     observer.observe(container);
     resize();
-    loop();
+    let disposed = false;
+    document.fonts?.ready.then(() => {
+      if (disposed) return;
+      measureNodes();
+      for (let pass = 0; pass < COLLISION_PASSES; pass++) separate();
+      requestDraw();
+    });
 
     return () => {
+      disposed = true;
       cancelAnimationFrame(frame);
       observer.disconnect();
       canvas.removeEventListener("pointerdown", onPointerDown);
