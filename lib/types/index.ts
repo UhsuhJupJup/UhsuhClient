@@ -69,6 +69,30 @@ export interface KeywordDetail {
   relatedKeywords?: RelatedKeyword[];
 }
 
+export interface TopKeyword {
+  id: number;
+  name: string;
+  articleCount: number;
+}
+
+export interface KeywordGraphCenter {
+  id: number;
+  name: string;
+  articleCount: number;
+}
+
+export interface KeywordNeighborLink {
+  sourceId: number;
+  targetId: number;
+  sharedArticleCount: number;
+}
+
+export interface KeywordGraph {
+  center: KeywordGraphCenter;
+  neighbors: RelatedKeyword[];
+  neighborLinks: KeywordNeighborLink[];
+}
+
 export interface MatchedKeyword {
   id: number;
   name: string;
