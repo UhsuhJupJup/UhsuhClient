@@ -55,10 +55,42 @@ export interface TopicDetail {
   keywords: Keyword[];
 }
 
+export interface RelatedKeyword {
+  id: number;
+  name: string;
+  sharedArticleCount: number;
+}
+
 export interface KeywordDetail {
   id: number;
   name: string;
   topics: Topic[];
+  articleCount?: number;
+  relatedKeywords?: RelatedKeyword[];
+}
+
+export interface TopKeyword {
+  id: number;
+  name: string;
+  articleCount: number;
+}
+
+export interface KeywordGraphCenter {
+  id: number;
+  name: string;
+  articleCount: number;
+}
+
+export interface KeywordNeighborLink {
+  sourceId: number;
+  targetId: number;
+  sharedArticleCount: number;
+}
+
+export interface KeywordGraph {
+  center: KeywordGraphCenter;
+  neighbors: RelatedKeyword[];
+  neighborLinks: KeywordNeighborLink[];
 }
 
 export interface MatchedKeyword {

@@ -9,6 +9,8 @@ import { BackLink } from "@/components/BackLink";
 import { DetailBadge } from "@/components/DetailBadge";
 import { SubscribeCta } from "@/components/SubscribeCta";
 import { RecentArticles } from "@/components/RecentArticles";
+import { RelatedKeywordList } from "@/components/keyword/RelatedKeywordList";
+import { formatCount } from "@/lib/format";
 
 export async function generateMetadata({
   params,
@@ -45,6 +47,7 @@ export default async function KeywordDetailPage({
     throw error;
   }
   const { content: articles } = await getArticles({ keywordIds: [keywordId], size: 20 });
+  const relatedKeywords = keyword.relatedKeywords ?? [];
 
   return (
     <main className="max-w-[1000px] mx-auto px-6 py-12">
@@ -52,13 +55,13 @@ export default async function KeywordDetailPage({
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <DetailBadge label="키워드" />
-          <h1 className="font-mono text-[36px] font-extrabold tracking-[-0.025em] m-0">{keyword.name}</h1>
+          <h1 className="font-mono text-[36px] font-extrabold tracking-[-0.025em] m-0 [overflow-wrap:anywhere]">{keyword.name}</h1>
           {keyword.topics.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm text-muted">
               {keyword.topics.map((topic) => (
                 <Link
                   key={topic.id}
-                  href={`/topic/${topic.id}`}
+                  href={`/explore?tab=topic&topicIds=${topic.id}`}
                   className="text-muted no-underline hover:text-primary transition-colors"
                 >
                   토픽 · {topic.name}
@@ -66,9 +69,25 @@ export default async function KeywordDetailPage({
               ))}
             </div>
           )}
+          {keyword.articleCount !== undefined && (
+            <p className="mt-3.5 mb-0 text-[15px] text-muted">
+              주워온 글{" "}
+              <b className="font-mono text-[22px] font-extrabold tracking-[-0.02em] text-fg tabular-nums">
+                {formatCount(keyword.articleCount)}
+              </b>
+              개
+            </p>
+          )}
         </div>
         <SubscribeCta label="+ 이 키워드 구독" />
       </div>
+
+      {relatedKeywords.length > 0 && (
+        <section className="mt-10">
+          <h2 className="text-2xl font-extrabold tracking-[-0.02em] mb-5">함께 자주 나온 키워드</h2>
+          <RelatedKeywordList keywords={relatedKeywords} />
+        </section>
+      )}
 
       <RecentArticles articles={articles} />
     </main>

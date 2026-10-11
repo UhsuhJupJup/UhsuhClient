@@ -28,3 +28,7 @@ export function formatDuration(seconds: number): string {
   const rest = seconds % 60;
   return rest === 0 ? `${minutes}m` : `${minutes}m ${rest}s`;
 }
+
+export function formatCount(value: number): string {
+  return value.toLocaleString("ko-KR");
+}

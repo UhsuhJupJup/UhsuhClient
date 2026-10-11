@@ -4,7 +4,7 @@ import { getArticles } from "@/lib/api/articles";
 import { getBlogs } from "@/lib/api/blogs";
 import { ArticleCard } from "@/components/ArticleCard";
 import { BlogLogo } from "@/components/BlogLogo";
-import { KeywordTrendGraph } from "@/components/KeywordTrendGraph";
+import { KeywordGraphExplorer } from "@/components/keyword/KeywordGraphExplorer";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import type { Metadata } from "next";
 
@@ -139,7 +139,7 @@ export default async function LandingPage() {
           <h2 className="text-[30px] font-extrabold tracking-[-0.02em] text-fg m-0">
             인기 키워드를 확인하세요
           </h2>
-          <KeywordTrendGraph />
+          <KeywordGraphExplorer />
         </section>
 
         <div className="border-t border-border" />
