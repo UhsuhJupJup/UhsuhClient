@@ -9,11 +9,13 @@ import type { Note } from "@/lib/types";
 import { LoginPanel } from "@/components/auth/LoginPanel";
 import { RecommendationPanel } from "@/components/note/RecommendationPanel";
 import { NoteGlobalGraphPanel } from "@/components/note/NoteGlobalGraphPanel";
+import { NoteAnalysisBadge } from "@/components/note/NoteAnalysisBadge";
 import { PageHeader } from "@/components/PageHeader";
 import { formatDateTime } from "@/lib/format";
 import { stripMarkdown } from "@/lib/markdown";
 
 const tabBase = "px-3.5 py-2 rounded-lg font-semibold text-sm transition-colors";
+const PENDING_REFRESH_MS = 15000;
 
 export default function NotesPage() {
   const { user, loading, getIdToken } = useAuth();
@@ -41,6 +43,19 @@ export default function NotesPage() {
   useEffect(() => {
     if (user) load();
   }, [user, load]);
+
+  const hasPending = notes?.some((note) => note.analysisStatus === "PENDING") ?? false;
+  useEffect(() => {
+    if (!user || !hasPending) return;
+    const timer = setInterval(() => {
+      void load();
+    }, PENDING_REFRESH_MS);
+    return () => clearInterval(timer);
+  }, [user, hasPending, load]);
+
+  const updateNote = useCallback((noteId: number, patch: Partial<Note>) => {
+    setNotes((prev) => (prev ? prev.map((note) => (note.id === noteId ? { ...note, ...patch } : note)) : prev));
+  }, []);
 
   if (loading) {
     return <main className="max-w-[760px] mx-auto px-6 py-24 text-center text-muted">불러오는 중…</main>;
@@ -117,7 +132,10 @@ export default function NotesPage() {
                     {preview && (
                       <p className="text-sm text-muted leading-relaxed mt-1.5 mb-0 line-clamp-2">{preview}</p>
                     )}
-                    <p className="font-mono text-xs text-muted mt-3 mb-0">{formatDateTime(note.createdAt)}</p>
+                    <div className="flex flex-wrap items-center gap-2 mt-3">
+                      <p className="font-mono text-xs text-muted m-0">{formatDateTime(note.createdAt)}</p>
+                      <NoteAnalysisBadge note={note} />
+                    </div>
                     {note.keywords.length > 0 && (
                       <div className="flex flex-wrap gap-1.5 mt-3">
                         {note.keywords.map((keyword) => (
@@ -170,11 +188,7 @@ export default function NotesPage() {
                 <RecommendationPanel
                   selectedNote={selectedNote}
                   onClose={closeWorkspace}
-                  onAnalyzed={(noteId, keywords) =>
-                    setNotes((prev) =>
-                      prev ? prev.map((note) => (note.id === noteId ? { ...note, keywords } : note)) : prev,
-                    )
-                  }
+                  onNoteUpdate={updateNote}
                 />
               ) : (
                 <div className="w-full bg-card border border-border rounded-2xl p-5">
