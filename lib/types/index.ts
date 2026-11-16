@@ -108,11 +108,15 @@ export interface ArticleDetail {
   keywords: MatchedKeyword[];
 }
 
+export type NoteAnalysisStatus = "NONE" | "PENDING" | "FAILED" | "ANALYZED";
+
 export interface Note {
   id: number;
   title: string;
   content: string;
   analyzedAt: string | null;
+  analysisStatus: NoteAnalysisStatus;
+  recommendationReady: boolean;
   keywords: string[];
   createdAt: string;
   updatedAt: string;
@@ -127,7 +131,10 @@ export interface RecommendedArticle {
   matchedKeywords: string[];
 }
 
+export type NoteRecommendationStatus = "READY" | "PENDING" | "FAILED";
+
 export interface NoteRecommendation {
+  status: NoteRecommendationStatus;
   keywords: string[];
   articles: RecommendedArticle[];
 }
