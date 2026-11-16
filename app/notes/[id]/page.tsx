@@ -10,6 +10,7 @@ import { LoginPanel } from "@/components/auth/LoginPanel";
 import { NoteEditor } from "@/components/note/NoteEditor";
 import { NoteMarkdown } from "@/components/note/NoteMarkdown";
 import { RecommendationPanel } from "@/components/note/RecommendationPanel";
+import { NoteAnalysisBadge } from "@/components/note/NoteAnalysisBadge";
 import { BackLink } from "@/components/BackLink";
 import { formatDateTime } from "@/lib/format";
 
@@ -114,6 +115,9 @@ export default function NoteDetailPage({ params }: { params: Promise<{ id: strin
                 {formatDateTime(note.createdAt)}
                 {note.updatedAt !== note.createdAt ? ` · 수정 ${formatDateTime(note.updatedAt)}` : ""}
               </p>
+              <div className="mt-2">
+                <NoteAnalysisBadge note={note} />
+              </div>
             </div>
             <div className="flex gap-2 shrink-0">
               {!sidebarOpen && (
@@ -166,9 +170,7 @@ export default function NoteDetailPage({ params }: { params: Promise<{ id: strin
               <RecommendationPanel
                 selectedNote={note}
                 onClose={() => setSidebarOpen(false)}
-                onAnalyzed={(_noteId, keywords) =>
-                  setNote((prev) => (prev ? { ...prev, keywords } : prev))
-                }
+                onNoteUpdate={(_noteId, patch) => setNote((prev) => (prev ? { ...prev, ...patch } : prev))}
               />
             </div>
           </aside>

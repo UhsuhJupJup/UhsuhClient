@@ -47,6 +47,10 @@ export async function getRecommendations(
   return (await authedFetch(`/api/notes/${id}/recommendations`, token)).json();
 }
 
+export async function retryRecommendations(token: string, id: number | string): Promise<void> {
+  await authedFetch(`/api/notes/${id}/recommendations/retry`, token, { method: "POST" });
+}
+
 export async function getNoteGraph(
   token: string,
   id: number | string,
